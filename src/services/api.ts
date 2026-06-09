@@ -1,6 +1,12 @@
 import {
   GeneratedSpec,
   SpecificationWithProject,
+  Intake,
+  ProjectType,
+  Engagement,
+  TimelinePref,
+  Completeness,
+  Lineage,
 } from '../types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -37,6 +43,7 @@ export const api = {
     return request('/health');
   },
 
+  // ---- Spec system (kept) ----
   listSpecs(): Promise<{ specifications: SpecificationWithProject[] }> {
     return request('/api/specifications');
   },
@@ -68,5 +75,38 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(input),
     });
+  },
+
+  // ---- SourcePilot ----
+  listProjects(): Promise<{ projects: import('../types').Project[] }> {
+    return request('/api/projects');
+  },
+
+  createIntake(input: {
+    projectName: string;
+    projectDescription?: string;
+    projectType?: ProjectType;
+    engagement?: Engagement;
+    timelinePref?: TimelinePref;
+    requirement: string;
+    details?: string;
+    constraints?: string;
+  }): Promise<{ project: import('../types').Project; intake: Intake; completeness: Completeness }> {
+    return request('/api/intake', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  getIntake(projectId: string): Promise<{ intake: Intake }> {
+    return request(`/api/intake/${encodeURIComponent(projectId)}/latest`);
+  },
+
+  getCompleteness(projectId: string): Promise<Completeness> {
+    return request(`/api/projects/${encodeURIComponent(projectId)}/completeness`);
+  },
+
+  getLineage(projectId: string): Promise<Lineage> {
+    return request(`/api/artifacts/${encodeURIComponent(projectId)}/lineage`);
   },
 };
