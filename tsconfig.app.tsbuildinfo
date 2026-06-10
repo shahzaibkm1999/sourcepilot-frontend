@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/ideainput.tsx","./src/components/sidebar.tsx","./src/components/specviewer.tsx","./src/hooks/usespecs.ts","./src/pages/dashboard.tsx","./src/services/api.ts","./src/types/index.ts","./src/utils/date.ts","./src/utils/markdown.ts"],"version":"5.9.3"}
