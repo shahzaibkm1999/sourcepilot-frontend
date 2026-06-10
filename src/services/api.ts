@@ -7,6 +7,13 @@ import {
   TimelinePref,
   Completeness,
   Lineage,
+  Discovery,
+  Clarification,
+  ClarificationQuestion,
+  Scope,
+  Estimate,
+  Timeline,
+  Proposal,
 } from '../types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -108,5 +115,81 @@ export const api = {
 
   getLineage(projectId: string): Promise<Lineage> {
     return request(`/api/artifacts/${encodeURIComponent(projectId)}/lineage`);
+  },
+
+  // ---- Discovery ----
+  generateDiscovery(projectId: string): Promise<{ discovery: Discovery; completeness: Completeness }> {
+    return request('/api/discoveries/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  getDiscovery(projectId: string): Promise<{ discovery: Discovery }> {
+    return request(`/api/discoveries/${encodeURIComponent(projectId)}/latest`);
+  },
+
+  // ---- Clarifications ----
+  generateClarifications(projectId: string): Promise<{ clarification: Clarification; completeness: Completeness }> {
+    return request('/api/clarifications/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  saveClarifications(input: {
+    projectId: string;
+    questions: ClarificationQuestion[];
+    refinedInput?: string;
+  }): Promise<{ clarification: Clarification; completeness: Completeness }> {
+    return request('/api/clarifications/save', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+  listClarifications(projectId: string): Promise<{ clarifications: Clarification[] }> {
+    return request(`/api/clarifications/${encodeURIComponent(projectId)}`);
+  },
+
+  // ---- Scope ----
+  generateScope(projectId: string): Promise<{ scope: Scope; completeness: Completeness }> {
+    return request('/api/scope/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  getScope(projectId: string): Promise<{ scope: Scope }> {
+    return request(`/api/scope/${encodeURIComponent(projectId)}/latest`);
+  },
+
+  // ---- Estimate ----
+  generateEstimate(projectId: string): Promise<{ estimate: Estimate; completeness: Completeness }> {
+    return request('/api/estimate/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  getEstimate(projectId: string): Promise<{ estimate: Estimate }> {
+    return request(`/api/estimate/${encodeURIComponent(projectId)}/latest`);
+  },
+
+  // ---- Timeline ----
+  generateTimeline(projectId: string): Promise<{ timeline: Timeline; completeness: Completeness }> {
+    return request('/api/timeline/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  getTimeline(projectId: string): Promise<{ timeline: Timeline }> {
+    return request(`/api/timeline/${encodeURIComponent(projectId)}/latest`);
+  },
+
+  // ---- Proposal ----
+  generateProposal(projectId: string): Promise<{ proposal: Proposal; completeness: Completeness }> {
+    return request('/api/proposal/generate', {
+      method: 'POST',
+      body: JSON.stringify({ projectId }),
+    });
+  },
+  getProposal(projectId: string): Promise<{ proposal: Proposal }> {
+    return request(`/api/proposal/${encodeURIComponent(projectId)}/latest`);
   },
 };

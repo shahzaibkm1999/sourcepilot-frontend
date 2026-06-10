@@ -1,35 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Project, Completeness, LineageEntry, LineageStage, Intake } from '../../types';
+import { Project, Completeness, LineageEntry, Intake } from '../../types';
 import { api } from '../../services/api';
 import { formatRelative } from '../../utils/date';
+import { STAGE_ORDER, LineageSnapshot } from '../../utils/stages';
 import '../../styles/project-card.css';
 
 interface ProjectCardProps {
   project: Project;
   onSelect: (projectId: string) => void;
 }
-
-const STAGE_LABELS: Record<LineageStage, string> = {
-  intake: 'Intake',
-  discovery: 'Discovery',
-  clarification: 'Clarification',
-  scope: 'Scope',
-  estimate: 'Estimate',
-  timeline: 'Timeline',
-  proposal: 'Proposal',
-  specification: 'Specification',
-};
-
-const STAGE_ORDER: LineageStage[] = [
-  'intake',
-  'discovery',
-  'clarification',
-  'scope',
-  'estimate',
-  'timeline',
-  'proposal',
-  'specification',
-];
 
 /**
  * ProjectCard
@@ -109,7 +88,7 @@ export default function ProjectCard({ project, onSelect }: ProjectCardProps) {
         )}
         <span className="chip chip-stage">
           <span className="chip-stage-dot" aria-hidden="true" />
-          {STAGE_LABELS[currentStage as LineageStage]}
+          {LineageSnapshot[currentStage]}
         </span>
       </div>
 

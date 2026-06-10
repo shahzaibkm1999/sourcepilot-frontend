@@ -55,6 +55,97 @@ export interface Intake {
   created_at: string;
 }
 
+export interface Discovery {
+  id: string;
+  project_id: string;
+  ambiguities: { area: string; question: string; priority: 'low' | 'medium' | 'high' }[] | null;
+  missing_info: string[] | null;
+  risks: { title: string; severity: 'low' | 'medium' | 'high'; mitigation?: string }[] | null;
+  assumptions: string[] | null;
+  content: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface ClarificationQuestion {
+  id: string;
+  area: string;
+  question: string;
+  answer?: string | null;
+  status: 'pending' | 'answered';
+}
+export interface Clarification {
+  id: string;
+  project_id: string;
+  questions: ClarificationQuestion[];
+  refined_input: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface Scope {
+  id: string;
+  project_id: string;
+  in_scope: string[] | null;
+  out_of_scope: string[] | null;
+  future_considerations: string[] | null;
+  dependencies: string[] | null;
+  assumptions: string[] | null;
+  risks: string[] | null;
+  content: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface EstimateItem {
+  area: string;
+  hours: number;
+  /** Backend writes this as `complejidad` (bilingual naming). */
+  complejidad?: 'low' | 'medium' | 'high';
+  complexity?: 'low' | 'medium' | 'high';
+  confidence: 'low' | 'medium' | 'high';
+}
+export interface Estimate {
+  id: string;
+  project_id: string;
+  items: EstimateItem[] | null;
+  budget_range: { min: number; max: number; currency: string } | null;
+  risk_buffer: number | null;
+  total_hours_low: number | null;
+  total_hours_high: number | null;
+  content: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface TimelinePhase {
+  name: string;
+  duration_weeks: number;
+  milestones: string[];
+  dependencies: string[];
+}
+export interface Timeline {
+  id: string;
+  project_id: string;
+  phases: TimelinePhase[] | null;
+  total_weeks: number | null;
+  content: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface Proposal {
+  id: string;
+  project_id: string;
+  executivo_summary: string | null;
+  understanding: string | null;
+  scope_summary: string | null;
+  deliverables: string[] | null;
+  content: string | null;
+  version: number;
+  created_at: string;
+}
+
 export interface Completeness {
   score: number;          // 0..100
   missing: string[];
