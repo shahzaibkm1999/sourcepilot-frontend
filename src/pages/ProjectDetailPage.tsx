@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { ProjectWithDocuments, DocType, ProjectDocument } from '../types';
 import { api } from '../services/api';
 import { audienceLabel } from '../utils/audience';
@@ -7,7 +7,9 @@ import { groupByDocType, versionNumber } from '../utils/documents';
 import StatusChip from '../components/ui/StatusChip';
 import ProjectForm, { ProjectFormValues } from '../components/project/ProjectForm';
 import VersionHistory from '../components/document/VersionHistory';
-import DocumentViewer from '../components/document/DocumentViewer';
+// Lazy-load the viewer: it pulls in jspdf + html2canvas (~230 KB
+// gzipped) which we don't need to ship on the projects list.
+const DocumentViewer = lazy(() => import('../components/document/DocumentViewer'));
 import '../styles/project-detail.css';
 
 interface ProjectDetailPageProps {
@@ -95,9 +97,11 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
       setBusyType(docType);
       setError(null);
       try {
+        // The backend now returns a `pending` row in <2s; the AI
+        // call continues in the background and updates the row
+        // to `ready`/`failed`. We append the pending row locally
+        // and let the polling effect pick up the state change.
         const { document } = await api.generateDocument(projectId, docType);
-        // Append the new document to local state. We prepend so
-        // newest is first, matching the list's sort order.
         setProject((prev) =>
           prev ? { ...prev, documents: [document, ...prev.documents] } : prev,
         );
@@ -111,6 +115,29 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
     },
     [busyType, projectId],
   );
+
+  /**
+   * Poll `GET /api/projects/:id` while any document is `pending`,
+   * so the row flips from spinner to body without the user
+   * needing to refresh. Stops as soon as every doc is terminal
+   * (`ready` or `failed`).
+   */
+  useEffect(() => {
+    const hasPending =
+      project?.documents.some((d) => d.status === 'pending') ?? false;
+    if (!hasPending) return;
+
+    const interval = window.setInterval(async () => {
+      try {
+        const { project: fresh } = await api.getProject(projectId);
+        setProject(fresh);
+      } catch {
+        // Swallow polling errors — the next tick will retry.
+      }
+    }, 2000);
+
+    return () => window.clearInterval(interval);
+  }, [project?.documents, projectId]);
 
   const handleUpdateProject = useCallback(
     async (values: ProjectFormValues) => {
@@ -385,15 +412,23 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
 
       {selectedDoc && (
         <section className="project-detail-viewer" aria-label="Document viewer">
-          <DocumentViewer
-            doc={selectedDoc}
-            project={project}
-            regenerating={busyType === selectedDoc.doc_type}
-            onRegenerate={(dt) => generate(dt)}
-            onUpdateContent={(md) => handleUpdateDocumentContent(selectedDoc.id, md)}
-            onDelete={handleDeleteDocument(selectedDoc.id)}
-            onClose={() => setSelectedId(null)}
-          />
+          <Suspense
+            fallback={
+              <p className="muted project-detail-viewer-loading">
+                Loading viewer…
+              </p>
+            }
+          >
+            <DocumentViewer
+              doc={selectedDoc}
+              project={project}
+              regenerating={busyType === selectedDoc.doc_type}
+              onRegenerate={(dt) => generate(dt)}
+              onUpdateContent={(md) => handleUpdateDocumentContent(selectedDoc.id, md)}
+              onDelete={handleDeleteDocument(selectedDoc.id)}
+              onClose={() => setSelectedId(null)}
+            />
+          </Suspense>
         </section>
       )}
     </div>

@@ -255,10 +255,22 @@ export default function DocumentViewer({
                 type="button"
                 className="ghost-button primary"
                 onClick={handleRegenerate}
-                disabled={regenerating}
-                title="Generate a new version of this document"
+                disabled={regenerating || doc.status === 'pending' || doc.status === 'failed'}
+                title={
+                  doc.status === 'pending'
+                    ? 'Wait for the current version to finish generating'
+                    : doc.status === 'failed'
+                      ? 'Retry — this version failed to generate'
+                      : 'Generate a new version of this document'
+                }
               >
-                {regenerating ? 'Regenerating…' : 'Regenerate'}
+                {regenerating
+                  ? 'Regenerating…'
+                  : doc.status === 'pending'
+                    ? 'Generating…'
+                    : doc.status === 'failed'
+                      ? 'Retry'
+                      : 'Regenerate'}
               </button>
               <button
                 type="button"
@@ -282,10 +294,18 @@ export default function DocumentViewer({
           rows={24}
           spellCheck
         />
+      ) : doc.status === 'pending' ? (
+        <div className="document-article-pending">
+          <div className="document-article-pending-spinner" aria-hidden="true" />
+          <p>
+            Generating your <strong>{docTypeLabel(doc.doc_type)}</strong>…
+            this usually takes 10–30 seconds.
+          </p>
+        </div>
       ) : (
         <div
           className="document-article-body"
-          // The Markdown source comes from our own backend (Gemini).
+          // The Markdown source comes from our own backend (DeepSeek).
           // renderMarkdown escapes all input before applying syntax.
           dangerouslySetInnerHTML={{ __html: html }}
         />

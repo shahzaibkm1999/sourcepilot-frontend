@@ -191,3 +191,30 @@
         font-size: 20px;
     }
 }
+
+.document-article-pending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-9) var(--space-5);
+    text-align: center;
+    color: var(--color-ink-muted);
+    font-family: var(--font-display);
+    font-style: italic;
+    min-height: 240px;
+}
+
+.document-article-pending-spinner {
+    width: 32px;
+    height: 32px;
+    border: 2.5px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: document-article-pending-spin 0.9s linear infinite;
+}
+
+@keyframes document-article-pending-spin {
+    to { transform: rotate(360deg); }
+}

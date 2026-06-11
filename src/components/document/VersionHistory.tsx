@@ -84,12 +84,27 @@ export default function VersionHistory({
                             current
                           </span>
                         )}
+                        {doc.status === 'pending' && (
+                          <span className="version-history-item-status-badge version-history-item-status-badge--pending">
+                            <span className="version-history-item-spinner" aria-hidden="true" />
+                            generating…
+                          </span>
+                        )}
+                        {doc.status === 'failed' && (
+                          <span className="version-history-item-status-badge version-history-item-status-badge--failed">
+                            failed
+                          </span>
+                        )}
                         <span className="version-history-item-sep muted">·</span>
                         <time
                           className="version-history-item-time muted"
                           dateTime={doc.created_at}
                         >
-                          generated {formatRelative(doc.created_at)}
+                          {doc.status === 'pending'
+                            ? `queued ${formatRelative(doc.created_at)}`
+                            : doc.status === 'failed'
+                              ? `failed ${formatRelative(doc.created_at)}`
+                              : `generated ${formatRelative(doc.created_at)}`}
                         </time>
                       </div>
                     </div>
@@ -99,8 +114,20 @@ export default function VersionHistory({
                         className="ghost-button"
                         onClick={() => onSelect(doc.id)}
                         aria-pressed={isSelected}
+                        disabled={doc.status === 'pending'}
+                        title={
+                          doc.status === 'pending'
+                            ? 'Still generating…'
+                            : doc.status === 'failed'
+                              ? 'View the failure message'
+                              : 'View this document version'
+                        }
                       >
-                        {isSelected ? 'Hide' : 'View'}
+                        {doc.status === 'pending'
+                          ? 'View'
+                          : isSelected
+                            ? 'Hide'
+                            : 'View'}
                       </button>
                     </div>
                   </li>

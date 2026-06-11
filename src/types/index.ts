@@ -10,6 +10,7 @@
 
 export type Audience = 'non_tecnico' | 'tecnico';
 export type DocType = 'proposal' | 'tech_scope';
+export type DocumentStatus = 'pending' | 'ready' | 'failed';
 
 export interface Project {
   id: string;
@@ -27,6 +28,12 @@ export interface ProjectDocument {
   doc_type: DocType;
   content_markdown: string;
   created_at: string;
+  /**
+   * Queue state. `pending` = AI call in flight, body is empty.
+   * `ready` = body is final. `failed` = AI call threw, body
+   * contains the error message.
+   */
+  status: DocumentStatus;
 }
 
 /** A project bundled with all its documents (joined on the server). */
