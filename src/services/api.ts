@@ -73,4 +73,50 @@ export const api = {
   getDocument(id: string): Promise<{ document: ProjectDocument }> {
     return request(`/api/projects/documents/${encodeURIComponent(id)}`);
   },
+
+  /**
+   * Partial update of a project's intake fields. `null` for an
+   * optional field (client_name, project_type) clears it; absent
+   * keys are left untouched. At least one field is required.
+   */
+  updateProject(
+    id: string,
+    partial: {
+      name?: string;
+      client_name?: string | null;
+      audience?: Audience;
+      project_type?: string | null;
+      raw_requirement?: string;
+    },
+  ): Promise<{ project: Project }> {
+    return request(`/api/projects/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(partial),
+    });
+  },
+
+  /** Hard-delete a project. Cascades to all of its documents. */
+  deleteProject(id: string): Promise<void> {
+    return request(`/api/projects/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /** Edit a single document's body. Does not bump `created_at`. */
+  updateDocument(
+    id: string,
+    contentMarkdown: string,
+  ): Promise<{ document: ProjectDocument }> {
+    return request(`/api/projects/documents/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ content_markdown: contentMarkdown }),
+    });
+  },
+
+  /** Hard-delete a single document version. Other versions remain. */
+  deleteDocument(id: string): Promise<void> {
+    return request(`/api/projects/documents/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
 };

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ProjectDocument, Project, DocType } from '../../types';
 import { renderMarkdown } from '../../utils/markdown';
 import { docTypeLabel, slugify } from '../../utils/audience';
@@ -12,19 +12,29 @@ interface DocumentViewerProps {
   regenerating: boolean;
   onRegenerate: (docType: DocType) => void;
   onClose: () => void;
+  /**
+   * Save the edited body. Resolves on success; rejects on error so
+   * the viewer can keep the textarea open and surface the failure.
+   */
+  onUpdateContent?: (markdown: string) => Promise<void>;
+  /** Delete this document version. Parent owns the API + state. */
+  onDelete?: () => void;
 }
 
 /**
  * DocumentViewer
  * --------------
  * Renders a single document's `content_markdown` inline. Provides
- * a sticky action bar with Copy, Download .md, Export PDF,
- * Regenerate, Close.
+ * a sticky action bar with Copy, Download .md, Export PDF, Edit,
+ * Delete, Regenerate, Close. In edit mode the body swaps from
+ * rendered HTML to a raw `<textarea>` and the bar shows Save /
+ * Cancel instead.
  *
  * Honest UI (Constitution Article IV): the backend persists before
  * returning, so every document in this viewer is durable server
  * state. There is no "unsaved preview" — only the in-flight
- * "Regenerating…" / "Exporting…" disabled state on the buttons.
+ * "Regenerating…" / "Exporting…" / "Saving…" disabled state on the
+ * buttons.
  */
 export default function DocumentViewer({
   doc,
@@ -32,11 +42,24 @@ export default function DocumentViewer({
   regenerating,
   onRegenerate,
   onClose,
+  onUpdateContent,
+  onDelete,
 }: DocumentViewerProps) {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState(doc.content_markdown);
   const articleRef = useRef<HTMLElement>(null);
   const html = renderMarkdown(doc.content_markdown);
+
+  // Keep the edit draft in sync with the parent's `doc` whenever it
+  // changes (e.g. after a save, or when the user navigates to a
+  // different version). Without this, switching versions while in
+  // edit mode would show stale text.
+  useEffect(() => {
+    setDraft(doc.content_markdown);
+  }, [doc.id, doc.content_markdown]);
 
   const handleCopy = async () => {
     try {
@@ -98,6 +121,47 @@ export default function DocumentViewer({
     }
   };
 
+  const handleStartEdit = () => {
+    setDraft(doc.content_markdown);
+    setEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setDraft(doc.content_markdown);
+    setEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!onUpdateContent) return;
+    // No-op saves are still saves: respect the user clicking Save.
+    // But if the draft is identical to the current content, skip the
+    // PATCH and just exit edit mode — avoids needless round-trips.
+    if (draft === doc.content_markdown) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    try {
+      await onUpdateContent(draft);
+      setEditing(false);
+    } catch (err) {
+      // Parent already surfaced the error. Keep the editor open so
+      // the user doesn't lose their changes.
+      window.alert(
+        err instanceof Error
+          ? `Save failed: ${err.message}`
+          : 'Save failed: an unknown error occurred',
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!onDelete) return;
+    onDelete();
+  };
+
   return (
     <article
       ref={articleRef}
@@ -119,57 +183,113 @@ export default function DocumentViewer({
           </time>
         </div>
         <div className="document-article-actions">
-          <button
-            type="button"
-            className="ghost-button"
-            onClick={handleCopy}
-            title="Copy the raw markdown to the clipboard"
-          >
-            {copied ? '✓ Copied' : 'Copy'}
-          </button>
-          <button
-            type="button"
-            className="ghost-button"
-            onClick={handleDownload}
-            title="Download as a .md file"
-          >
-            ↓ .md
-          </button>
-          <button
-            type="button"
-            className="ghost-button"
-            onClick={handleExportPdf}
-            disabled={exporting}
-            title="Download as a PDF file"
-          >
-            {exporting ? 'Exporting…' : '↓ PDF'}
-          </button>
-          <button
-            type="button"
-            className="ghost-button primary"
-            onClick={handleRegenerate}
-            disabled={regenerating}
-            title="Generate a new version of this document"
-          >
-            {regenerating ? 'Regenerating…' : 'Regenerate'}
-          </button>
-          <button
-            type="button"
-            className="ghost-button"
-            onClick={onClose}
-            title="Close the viewer"
-          >
-            Close
-          </button>
+          {editing ? (
+            <>
+              <button
+                type="button"
+                className="ghost-button primary"
+                onClick={handleSaveEdit}
+                disabled={saving}
+                title="Save the edited body"
+              >
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={handleCancelEdit}
+                disabled={saving}
+                title="Discard changes and exit edit mode"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={handleCopy}
+                title="Copy the raw markdown to the clipboard"
+              >
+                {copied ? '✓ Copied' : 'Copy'}
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={handleDownload}
+                title="Download as a .md file"
+              >
+                ↓ .md
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={handleExportPdf}
+                disabled={exporting}
+                title="Download as a PDF file"
+              >
+                {exporting ? 'Exporting…' : '↓ PDF'}
+              </button>
+              {onUpdateContent && (
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={handleStartEdit}
+                  title="Edit the body of this document version"
+                >
+                  Edit
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  type="button"
+                  className="ghost-button danger"
+                  onClick={handleDelete}
+                  title="Delete this document version"
+                >
+                  Delete
+                </button>
+              )}
+              <button
+                type="button"
+                className="ghost-button primary"
+                onClick={handleRegenerate}
+                disabled={regenerating}
+                title="Generate a new version of this document"
+              >
+                {regenerating ? 'Regenerating…' : 'Regenerate'}
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={onClose}
+                title="Close the viewer"
+              >
+                Close
+              </button>
+            </>
+          )}
         </div>
       </header>
 
-      <div
-        className="document-article-body"
-        // The Markdown source comes from our own backend (Gemini).
-        // renderMarkdown escapes all input before applying syntax.
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      {editing ? (
+        <textarea
+          className="document-article-edit"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          disabled={saving}
+          rows={24}
+          spellCheck
+        />
+      ) : (
+        <div
+          className="document-article-body"
+          // The Markdown source comes from our own backend (Gemini).
+          // renderMarkdown escapes all input before applying syntax.
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
     </article>
   );
 }

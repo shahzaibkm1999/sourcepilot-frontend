@@ -3,7 +3,9 @@ import { ProjectWithDocuments, DocType, ProjectDocument } from '../types';
 import { api } from '../services/api';
 import { audienceLabel } from '../utils/audience';
 import { formatRelative } from '../utils/date';
+import { groupByDocType, versionNumber } from '../utils/documents';
 import StatusChip from '../components/ui/StatusChip';
+import ProjectForm, { ProjectFormValues } from '../components/project/ProjectForm';
 import VersionHistory from '../components/document/VersionHistory';
 import DocumentViewer from '../components/document/DocumentViewer';
 import '../styles/project-detail.css';
@@ -34,6 +36,10 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
   const [busyType, setBusyType] = useState<DocType | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [justCreatedId, setJustCreatedId] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [savingProject, setSavingProject] = useState(false);
+  const [deletingProject, setDeletingProject] = useState(false);
+  const [busyDocId, setBusyDocId] = useState<string | null>(null);
   const highlightTimer = useRef<number | null>(null);
 
   // Initial load
@@ -106,6 +112,107 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
     [busyType, projectId],
   );
 
+  const handleUpdateProject = useCallback(
+    async (values: ProjectFormValues) => {
+      setSavingProject(true);
+      setError(null);
+      try {
+        const { project: updated } = await api.updateProject(projectId, {
+          name: values.name,
+          client_name: values.client_name === '' ? null : values.client_name,
+          audience: values.audience,
+          project_type: values.project_type === '' ? null : values.project_type,
+          raw_requirement: values.raw_requirement,
+        });
+        // Merge the response into local state. Preserve documents.
+        setProject((prev) =>
+          prev
+            ? { ...prev, ...updated, documents: prev.documents }
+            : prev,
+        );
+        setEditing(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save project');
+      } finally {
+        setSavingProject(false);
+      }
+    },
+    [projectId],
+  );
+
+  const handleDeleteProject = useCallback(async () => {
+    if (deletingProject) return;
+    const confirmed = window.confirm(
+      `Delete project "${project?.name ?? ''}"? This removes the project AND all of its documents. This cannot be undone.`,
+    );
+    if (!confirmed) return;
+    setDeletingProject(true);
+    setError(null);
+    try {
+      await api.deleteProject(projectId);
+      onBack();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete project');
+      setDeletingProject(false);
+    }
+  }, [deletingProject, project?.name, projectId, onBack]);
+
+  const handleUpdateDocumentContent = useCallback(
+    async (id: string, contentMarkdown: string) => {
+      setBusyDocId(id);
+      setError(null);
+      try {
+        const { document: updated } = await api.updateDocument(id, contentMarkdown);
+        setProject((prev) =>
+          prev
+            ? {
+                ...prev,
+                documents: prev.documents.map((d) => (d.id === id ? updated : d)),
+              }
+            : prev,
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save document');
+        throw err; // let the viewer exit edit mode only on success
+      } finally {
+        setBusyDocId(null);
+      }
+    },
+    [],
+  );
+
+  const handleDeleteDocument = useCallback(
+    (id: string) => async () => {
+      if (busyDocId) return;
+      const docs = project?.documents ?? [];
+      const doc = docs.find((d) => d.id === id);
+      const group = doc
+        ? groupByDocType(docs).find((g) => g.docType === doc.doc_type)
+        : undefined;
+      const versionLabel = group && doc ? `v${versionNumber(group, doc)}` : 'this version';
+      const confirmed = window.confirm(
+        `Delete ${versionLabel}? This cannot be undone.`,
+      );
+      if (!confirmed) return;
+      setBusyDocId(id);
+      setError(null);
+      try {
+        await api.deleteDocument(id);
+        setProject((prev) =>
+          prev
+            ? { ...prev, documents: prev.documents.filter((d) => d.id !== id) }
+            : prev,
+        );
+        if (selectedId === id) setSelectedId(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete document');
+      } finally {
+        setBusyDocId(null);
+      }
+    },
+    [busyDocId, project?.documents, selectedId],
+  );
+
   if (loading && !project) {
     return (
       <div className="project-detail-page project-detail-page--loading">
@@ -155,27 +262,71 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
       </button>
 
       <header className="project-detail-header">
-        <div className="project-detail-eyebrow">Project</div>
-        <h1 className="project-detail-title">{project.name}</h1>
-        {project.client_name && (
-          <div className="project-detail-client muted">for {project.client_name}</div>
-        )}
-
-        <div className="project-detail-chips">
-          <StatusChip tone="audience" label={audienceLabel(project.audience)} />
-          {project.project_type && (
-            <StatusChip tone="type" label={project.project_type} />
+        <div className="project-detail-eyebrow-row">
+          <div className="project-detail-eyebrow">Project</div>
+          {!editing && (
+            <div className="project-detail-eyebrow-actions">
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={() => setEditing(true)}
+                disabled={deletingProject}
+              >
+                Edit project
+              </button>
+              <button
+                type="button"
+                className="ghost-button danger"
+                onClick={handleDeleteProject}
+                disabled={deletingProject}
+              >
+                {deletingProject ? 'Deleting…' : 'Delete project'}
+              </button>
+            </div>
           )}
-          <span className="muted project-detail-time">
-            created {formatRelative(project.created_at)}
-          </span>
         </div>
 
-        {project.raw_requirement && (
-          <details className="project-detail-requirement" open>
-            <summary className="muted">Raw requirement</summary>
-            <p>{project.raw_requirement}</p>
-          </details>
+        {editing ? (
+          <ProjectForm
+            initialValues={{
+              name: project.name,
+              client_name: project.client_name ?? '',
+              audience: project.audience,
+              project_type: project.project_type ?? '',
+              raw_requirement: project.raw_requirement,
+            }}
+            submitLabel="Save Changes"
+            submitting={savingProject}
+            onSubmit={handleUpdateProject}
+            onCancel={() => {
+              setEditing(false);
+              setError(null);
+            }}
+          />
+        ) : (
+          <>
+            <h1 className="project-detail-title">{project.name}</h1>
+            {project.client_name && (
+              <div className="project-detail-client muted">for {project.client_name}</div>
+            )}
+
+            <div className="project-detail-chips">
+              <StatusChip tone="audience" label={audienceLabel(project.audience)} />
+              {project.project_type && (
+                <StatusChip tone="type" label={project.project_type} />
+              )}
+              <span className="muted project-detail-time">
+                created {formatRelative(project.created_at)}
+              </span>
+            </div>
+
+            {project.raw_requirement && (
+              <details className="project-detail-requirement" open>
+                <summary className="muted">Raw requirement</summary>
+                <p>{project.raw_requirement}</p>
+              </details>
+            )}
+          </>
         )}
       </header>
 
@@ -239,6 +390,8 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
             project={project}
             regenerating={busyType === selectedDoc.doc_type}
             onRegenerate={(dt) => generate(dt)}
+            onUpdateContent={(md) => handleUpdateDocumentContent(selectedDoc.id, md)}
+            onDelete={handleDeleteDocument(selectedDoc.id)}
             onClose={() => setSelectedId(null)}
           />
         </section>

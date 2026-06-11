@@ -14,6 +14,10 @@ interface ProjectFormProps {
   onSubmit: (values: ProjectFormValues) => void;
   onCancel: () => void;
   submitting: boolean;
+  /** Pre-fill the form (used for edit). Omit to start empty. */
+  initialValues?: Partial<ProjectFormValues>;
+  /** Submit button text. Defaults to "Create Project". */
+  submitLabel?: string;
 }
 
 /**
@@ -22,13 +26,25 @@ interface ProjectFormProps {
  * The 5-field intake form. Required: name, audience, raw_requirement
  * (>= 10 chars, mirrors backend Zod schema). Optional: client_name,
  * project_type.
+ *
+ * Used for both create and edit flows. Pass `initialValues` to start
+ * pre-filled (edit); omit it to start empty (create). The submit
+ * button label can be customized via `submitLabel`.
  */
-export default function ProjectForm({ onSubmit, onCancel, submitting }: ProjectFormProps) {
-  const [name, setName] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [audience, setAudience] = useState<Audience>('non_tecnico');
-  const [projectType, setProjectType] = useState('');
-  const [requirement, setRequirement] = useState('');
+export default function ProjectForm({
+  onSubmit,
+  onCancel,
+  submitting,
+  initialValues,
+  submitLabel = 'Create Project',
+}: ProjectFormProps) {
+  const [name, setName] = useState(initialValues?.name ?? '');
+  const [clientName, setClientName] = useState(initialValues?.client_name ?? '');
+  const [audience, setAudience] = useState<Audience>(
+    initialValues?.audience ?? 'non_tecnico',
+  );
+  const [projectType, setProjectType] = useState(initialValues?.project_type ?? '');
+  const [requirement, setRequirement] = useState(initialValues?.raw_requirement ?? '');
 
   const trimmedName = name.trim();
   const trimmedReq = requirement.trim();
@@ -157,7 +173,7 @@ export default function ProjectForm({ onSubmit, onCancel, submitting }: ProjectF
           className="primary-button"
           disabled={!canSubmit}
         >
-          {submitting ? 'Creating…' : 'Create Project'}
+          {submitting ? 'Saving…' : submitLabel}
         </button>
       </div>
     </form>
