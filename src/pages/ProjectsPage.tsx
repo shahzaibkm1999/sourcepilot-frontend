@@ -22,7 +22,7 @@ export default function ProjectsPage({
       <header className="projects-page-header">
         <div className="projects-page-header-inner">
           <div className="projects-page-eyebrow">SourcePilot</div>
-          <h1>AI Document Generator</h1>
+          <h1>AI Proposal Generator</h1>
           <p className="subtitle">
             One intake. Two audience-specific outputs. Turn a raw
             client requirement into a non-technical proposal or a
