@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Project } from '../../types';
-import { api } from '../../services/api';
+import { api, PAGE_SIZE } from '../../services/api';
 import ProjectCard from './ProjectCard';
 import '../../styles/project-list.css';
 
@@ -12,35 +12,56 @@ interface ProjectListProps {
 /**
  * ProjectList
  * -----------
- * The Projects page's main list. Renders every project as a
- * ProjectCard. Header has a + New Project CTA.
+ * The Projects page's main list. Renders every loaded project as
+ * a ProjectCard. The list is paginated — initial load fetches
+ * `PAGE_SIZE` rows, and a "Load more" button at the bottom
+ * appends the next page when there's more to show.
+ *
+ * Pagination state lives here (not in App) because no other view
+ * needs it. Navigating back to this page re-runs the mount effect
+ * and re-fetches the first page, which is how create / edit /
+ * delete get reflected without a shared store.
  */
 export default function ProjectList({ onSelectProject, onNewProject }: ProjectListProps) {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Re-fetch whenever the page becomes visible (cheap; small MVP list).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
+  const loadPage = useCallback(
+    async (nextOffset: number, append: boolean) => {
+      if (append) setLoadingMore(true);
+      else setLoading(true);
       setError(null);
       try {
-        const { projects } = await api.listProjects();
-        if (!cancelled) setProjects(projects);
+        const result = await api.listProjects({ limit: PAGE_SIZE, offset: nextOffset });
+        setProjects((prev) => (append ? [...prev, ...result.projects] : result.projects));
+        setTotal(result.total);
+        setHasMore(result.hasMore);
+        setOffset(nextOffset + result.projects.length);
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load projects');
-        }
+        setError(err instanceof Error ? err.message : 'Failed to load projects');
       } finally {
-        if (!cancelled) setLoading(false);
+        if (append) setLoadingMore(false);
+        else setLoading(false);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    },
+    [],
+  );
+
+  // Initial load. Re-runs on mount (so navigating back from
+  // create / edit / delete refetches the first page).
+  useEffect(() => {
+    loadPage(0, false);
+  }, [loadPage]);
+
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+    loadPage(offset, true);
+  };
 
   return (
     <div className="project-list">
@@ -84,6 +105,26 @@ export default function ProjectList({ onSelectProject, onNewProject }: ProjectLi
           />
         ))}
       </div>
+
+      {!loading && !error && projects.length > 0 && (
+        <div className="project-list-loadmore">
+          <p className="project-list-loadmore-count muted">
+            showing {projects.length} of {total}
+          </p>
+          {hasMore ? (
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? 'Loading…' : 'Load more'}
+            </button>
+          ) : (
+            <p className="project-list-loadmore-count muted">end of list</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -38,9 +38,21 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 //
 // Post-refactor (Jun 2026), the backend exposes five routes on
 // /api/projects. See backend/src/routes/projectRoutes.ts.
+export const PAGE_SIZE = 20;
+
 export const api = {
-  listProjects(): Promise<{ projects: Project[] }> {
-    return request('/api/projects');
+  /**
+   * Paginated list, newest first. Returns the requested page plus
+   * the total row count and a `hasMore` flag. Defaults match the
+   * backend defaults (limit=20, offset=0).
+   */
+  listProjects(
+    opts: { limit?: number; offset?: number } = {},
+  ): Promise<{ projects: Project[]; total: number; hasMore: boolean }> {
+    const limit = opts.limit ?? PAGE_SIZE;
+    const offset = opts.offset ?? 0;
+    const qs = `?limit=${limit}&offset=${offset}`;
+    return request(`/api/projects${qs}`);
   },
 
   getProject(id: string): Promise<{ project: ProjectWithDocuments }> {
