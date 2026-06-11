@@ -80,9 +80,10 @@ export default function DocumentViewer({
         <div className="document-article-stamp">
           <StatusChip tone="doc" label={docTypeLabel(doc.doc_type)} />
         </div>
-        <h2 className="document-article-title">
-          {project.name} — {docTypeLabel(doc.doc_type)}
-        </h2>
+        <h2 className="document-article-title">{project.name}</h2>
+        <div className="document-article-subtitle muted">
+          {docTypeLabel(doc.doc_type)}
+        </div>
         <div className="document-article-meta muted">
           Generated{' '}
           <time dateTime={doc.created_at}>

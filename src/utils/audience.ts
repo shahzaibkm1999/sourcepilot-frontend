@@ -10,13 +10,19 @@ export function audienceLabel(a: Audience): string {
   }
 }
 
-/** Convert a `DocType` enum to the human label we show in the UI. */
+/**
+ * Convert a `DocType` enum to the human label we show in the UI.
+ * Both outputs are proposals — the qualifier distinguishes the
+ * audience the document is written for. The underlying enum
+ * values (`'proposal'`, `'tech_scope'`) and the backend are
+ * unchanged; this is purely a UI label.
+ */
 export function docTypeLabel(d: DocType): string {
   switch (d) {
     case 'proposal':
-      return 'Proposal';
+      return 'Non-Technical Proposal';
     case 'tech_scope':
-      return 'Technical Scope';
+      return 'Technical Proposal';
   }
 }
 

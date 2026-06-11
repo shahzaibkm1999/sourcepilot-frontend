@@ -197,8 +197,8 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
             {busyType === 'proposal'
               ? 'Generating…'
               : hasProposal
-                ? `Regenerate Proposal · ${proposalCount} on file`
-                : 'Generate Proposal'}
+                ? `Regenerate Non-Technical Proposal · ${proposalCount} on file`
+                : 'Generate Non-Technical Proposal'}
           </button>
           <button
             type="button"
@@ -209,15 +209,16 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
             {busyType === 'tech_scope'
               ? 'Generating…'
               : hasTechScope
-                ? `Regenerate Technical Scope · ${techScopeCount} on file`
-                : 'Generate Technical Scope'}
+                ? `Regenerate Technical Proposal · ${techScopeCount} on file`
+                : 'Generate Technical Proposal'}
           </button>
         </div>
         <p className="muted generate-hint">
-          Same intake, two audience-specific outputs.{' '}
+          Same intake, two proposal variants — one for a non-technical
+          client, one for a technical client.{' '}
           {project.audience === 'non_tecnico'
-            ? 'This project is set to a non-technical client — a proposal will be the natural pick.'
-            : 'This project is set to a technical client — a technical scope will be the natural pick.'}
+            ? 'This project is set to a non-technical client — the non-technical proposal is the natural pick.'
+            : 'This project is set to a technical client — the technical proposal is the natural pick.'}
         </p>
       </section>
 
