@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { audienceLabel } from '../utils/audience';
 import { formatRelative } from '../utils/date';
 import StatusChip from '../components/ui/StatusChip';
-import DocumentList from '../components/document/DocumentList';
+import VersionHistory from '../components/document/VersionHistory';
 import DocumentViewer from '../components/document/DocumentViewer';
 import '../styles/project-detail.css';
 
@@ -197,7 +197,7 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
             {busyType === 'proposal'
               ? 'Generating…'
               : hasProposal
-                ? `Regenerate Non-Technical Proposal · ${proposalCount} on file`
+                ? `Regenerate Non-Technical Proposal · v${proposalCount}`
                 : 'Generate Non-Technical Proposal'}
           </button>
           <button
@@ -209,7 +209,7 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
             {busyType === 'tech_scope'
               ? 'Generating…'
               : hasTechScope
-                ? `Regenerate Technical Proposal · ${techScopeCount} on file`
+                ? `Regenerate Technical Proposal · v${techScopeCount}`
                 : 'Generate Technical Proposal'}
           </button>
         </div>
@@ -224,7 +224,7 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
 
       <section className="project-detail-documents" aria-label="Generated documents">
         <h2 className="project-detail-section-title">Documents</h2>
-        <DocumentList
+        <VersionHistory
           documents={project.documents}
           selectedId={selectedId}
           justCreatedId={justCreatedId}

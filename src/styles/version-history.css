@@ -1,0 +1,158 @@
+/* ===========================================
+   VersionHistory — grouped, versioned document list
+   Replaces the old document-list styles. Same tokens,
+   same hover/active/just-created behavior; new shape.
+   =========================================== */
+
+.version-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.version-history-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.version-history-group-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-rule);
+}
+
+.version-history-group-label {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-ink);
+    letter-spacing: -0.005em;
+}
+
+.version-history-group-count {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.version-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.version-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition:
+        border-color 180ms ease,
+        background-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.version-history-item:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-tint);
+}
+
+.version-history-item--active {
+    border-left-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent-soft) 18%, var(--color-surface));
+}
+
+.version-history-item--just-created {
+    /* Subtle accent border for a few seconds after generation. */
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    animation: version-just-created 1.6s ease-out 1;
+}
+
+@keyframes version-just-created {
+    0% {
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    }
+    100% {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    }
+}
+
+.version-history-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.version-history-item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.version-history-item-version {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    letter-spacing: 0.01em;
+}
+
+.version-history-item-current-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+    line-height: 1.3;
+}
+
+.version-history-item-sep {
+    font-size: 0.78rem;
+    user-select: none;
+}
+
+.version-history-item-time {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+}
+
+.version-history-empty {
+    padding: var(--space-6) var(--space-7);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.version-history-empty p {
+    line-height: 1.6;
+    max-width: 60ch;
+    margin: 0 auto;
+}
