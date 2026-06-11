@@ -20,6 +20,17 @@ interface ProjectDetailPageProps {
 const HIGHLIGHT_MS = 3500;
 
 /**
+ * Polling tuning. The interval is 2s so a typical 10-30s
+ * generation surfaces within 2s of completing. The max-attempts
+ * cap is the safety net for cases the backend reaper hasn't yet
+ * caught (network partition, backend down). At 2s × 90 = 3 min we
+ * exceed the backend's QUEUE_REAPER_MAX_AGE_MS (5 min) on the
+ * pessimistic side, but well before forever.
+ */
+const POLL_INTERVAL_MS = 2000;
+const POLL_MAX_ATTEMPTS = 90;
+
+/**
  * ProjectDetailPage
  * -----------------
  * Shows the captured project, two Generate buttons, the list of
@@ -121,23 +132,62 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
    * so the row flips from spinner to body without the user
    * needing to refresh. Stops as soon as every doc is terminal
    * (`ready` or `failed`).
+   *
+   * Implementation notes:
+   *   - Depends on the *boolean* `hasPending`, not the documents
+   *     array. The array gets a new reference on every successful
+   *     poll, which would tear down + recreate the interval each
+   *     tick and waste the first 2s of every cycle.
+   *   - 404 on the project (deleted server-side, or never existed)
+   *     stops polling immediately and surfaces the error — without
+   *     this the spinner runs forever.
+   *   - A max-attempts cap is the safety net for any other reason
+   *     the row never reaches a terminal state (network down,
+   *     backend reaper not running, etc.).
    */
+  const hasPending = project?.documents.some((d) => d.status === 'pending') ?? false;
+
   useEffect(() => {
-    const hasPending =
-      project?.documents.some((d) => d.status === 'pending') ?? false;
     if (!hasPending) return;
 
+    let attempts = 0;
+    let cancelled = false;
+
     const interval = window.setInterval(async () => {
+      if (cancelled) return;
+      attempts += 1;
+
+      if (attempts > POLL_MAX_ATTEMPTS) {
+        window.clearInterval(interval);
+        setError(
+          'Generation is taking longer than expected. Refresh the page ' +
+            'to check again, or click Regenerate to retry.',
+        );
+        return;
+      }
+
       try {
         const { project: fresh } = await api.getProject(projectId);
-        setProject(fresh);
-      } catch {
-        // Swallow polling errors — the next tick will retry.
+        if (!cancelled) setProject(fresh);
+      } catch (err) {
+        // 404 means the project is gone — stop polling. Anything
+        // else is treated as transient: the next tick will retry.
+        const message = err instanceof Error ? err.message : String(err);
+        if (/404|not found/i.test(message)) {
+          window.clearInterval(interval);
+          if (!cancelled) {
+            setError('This project no longer exists.');
+            setProject(null);
+          }
+        }
       }
-    }, 2000);
+    }, POLL_INTERVAL_MS);
 
-    return () => window.clearInterval(interval);
-  }, [project?.documents, projectId]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [hasPending, projectId]);
 
   const handleUpdateProject = useCallback(
     async (values: ProjectFormValues) => {

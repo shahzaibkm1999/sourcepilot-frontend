@@ -49,10 +49,11 @@ export const api = {
   listProjects(
     opts: { limit?: number; offset?: number } = {},
   ): Promise<{ projects: Project[]; total: number; hasMore: boolean }> {
-    const limit = opts.limit ?? PAGE_SIZE;
-    const offset = opts.offset ?? 0;
-    const qs = `?limit=${limit}&offset=${offset}`;
-    return request(`/api/projects${qs}`);
+    const params = new URLSearchParams({
+      limit: String(opts.limit ?? PAGE_SIZE),
+      offset: String(opts.offset ?? 0),
+    });
+    return request(`/api/projects?${params.toString()}`);
   },
 
   getProject(id: string): Promise<{ project: ProjectWithDocuments }> {

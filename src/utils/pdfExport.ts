@@ -7,7 +7,12 @@ import html2canvas from 'html2canvas';
  * Flow:
  *   1. Snapshot the element into a canvas with html2canvas (scale 2
  *      for crisp text on retina displays, white background so the
- *      snapshot looks like paper in any PDF viewer).
+ *      snapshot looks like paper in any PDF viewer). An `onclone`
+ *      callback sanitises the cloned document first — html2canvas
+ *      v1.4.1 doesn't support CSS `color-mix()`, so we resolve any
+ *      such calls to `rgb(...)` against the live page's computed
+ *      style before snapshotting. We also remove the action button
+ *      row from the clone; buttons don't belong in a printable PDF.
  *   2. Create a portrait A4 jsPDF document.
  *   3. Tile the canvas across as many pages as needed by slicing it
  *      vertically and adding one `addImage` per page. A naive
@@ -27,8 +32,60 @@ export async function exportElementAsPdf(
   const canvas = await html2canvas(element, {
     scale: 2,
     backgroundColor: '#ffffff',
-    // Don't fix the window scroll; the article is what we want.
     useCORS: true,
+    onclone: (clonedDoc) => {
+      // 1. Strip the action bar (Copy / Download / Export PDF /
+      //    Edit / Delete / Regenerate / Close) from the cloned
+      //    article — they're UI, not part of the printable doc.
+      const actions = clonedDoc.querySelectorAll('.document-article-actions');
+      actions.forEach((el) => el.parentElement?.removeChild(el));
+
+      // 2. Resolve every `color-mix(...)` call in the cloned
+      //    stylesheets to a concrete `rgb(...)` so html2canvas's
+      //    parser doesn't choke. We use a hidden probe element in
+      //    the LIVE document to compute the resolved value (the
+      //    clone's variables aren't materialised at the time
+      //    onclone fires).
+      const probe = document.createElement('div');
+      probe.style.position = 'absolute';
+      probe.style.visibility = 'hidden';
+      probe.style.pointerEvents = 'none';
+      probe.style.width = '0';
+      probe.style.height = '0';
+      document.body.appendChild(probe);
+
+      try {
+        const sheets = Array.from(clonedDoc.styleSheets);
+        for (const sheet of sheets) {
+          // Cross-origin sheets: skip (we can't read their rules).
+          // Our own stylesheets are same-origin.
+          let rules: CSSRuleList | null = null;
+          try {
+            rules = (sheet as CSSStyleSheet).cssRules;
+          } catch {
+            continue;
+          }
+          if (!rules) continue;
+
+          for (let i = 0; i < rules.length; i += 1) {
+            const rule = rules[i];
+            if (!(rule instanceof CSSStyleRule)) continue;
+            const style = rule.style;
+            for (let j = 0; j < style.length; j += 1) {
+              const prop = style.item(j);
+              const value = style.getPropertyValue(prop);
+              if (!value.includes('color-mix(')) continue;
+              const resolved = resolveColorMix(probe, value);
+              if (resolved !== null) {
+                style.setProperty(prop, resolved);
+              }
+            }
+          }
+        }
+      } finally {
+        document.body.removeChild(probe);
+      }
+    },
   });
 
   const pdf = new jsPDF({
@@ -91,4 +148,25 @@ export async function exportElementAsPdf(
   }
 
   pdf.save(filename);
+}
+
+/**
+ * Resolve a CSS property value containing one or more
+ * `color-mix(...)` calls into an `rgb(...)` form, by asking the
+ * browser's own `getComputedStyle` to evaluate it. Returns the
+ * original value unchanged if no substitution was possible (e.g.
+ * the browser doesn't support `color-mix`).
+ */
+function resolveColorMix(probe: HTMLElement, value: string): string | null {
+  if (typeof CSS === 'undefined' || !('supports' in CSS)) return null;
+  if (!CSS.supports('color', 'color-mix(in srgb, red, blue)')) return null;
+
+  probe.style.color = value;
+  const computed = getComputedStyle(probe).color;
+  // `computed` will be `rgb(...)` or `rgba(...)` if the browser
+  // resolved the value successfully; otherwise it falls back to
+  // the inherited color and equals an empty value or the original
+  // string.
+  if (!computed.startsWith('rgb')) return null;
+  return computed;
 }
