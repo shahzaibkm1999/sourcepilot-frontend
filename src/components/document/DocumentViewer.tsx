@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ProjectDocument, Project, DocType } from '../../types';
 import { renderMarkdown } from '../../utils/markdown';
 import { docTypeLabel, slugify } from '../../utils/audience';
+import { exportElementAsPdf } from '../../utils/pdfExport';
 import StatusChip from '../ui/StatusChip';
 import '../../styles/document-viewer.css';
 
@@ -17,12 +18,13 @@ interface DocumentViewerProps {
  * DocumentViewer
  * --------------
  * Renders a single document's `content_markdown` inline. Provides
- * a sticky action bar with Copy, Download .md, Regenerate, Close.
+ * a sticky action bar with Copy, Download .md, Export PDF,
+ * Regenerate, Close.
  *
  * Honest UI (Constitution Article IV): the backend persists before
  * returning, so every document in this viewer is durable server
  * state. There is no "unsaved preview" — only the in-flight
- * "Regenerating…" disabled state on the button.
+ * "Regenerating…" / "Exporting…" disabled state on the buttons.
  */
 export default function DocumentViewer({
   doc,
@@ -32,6 +34,8 @@ export default function DocumentViewer({
   onClose,
 }: DocumentViewerProps) {
   const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const articleRef = useRef<HTMLElement>(null);
   const html = renderMarkdown(doc.content_markdown);
 
   const handleCopy = async () => {
@@ -74,8 +78,32 @@ export default function DocumentViewer({
     onRegenerate(doc.doc_type);
   };
 
+  const handleExportPdf = async () => {
+    if (!articleRef.current || exporting) return;
+    const slug = slugify(project.name);
+    const stamp = new Date(doc.created_at).toISOString().slice(0, 10);
+    const filename = `${slug}-${doc.doc_type}-${stamp}.pdf`;
+    setExporting(true);
+    try {
+      await exportElementAsPdf(articleRef.current, filename);
+    } catch (err) {
+      // Mirror handleCopy: surface failures instead of swallowing.
+      window.alert(
+        err instanceof Error
+          ? `PDF export failed: ${err.message}`
+          : 'PDF export failed: an unknown error occurred',
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
-    <article className="document-article" aria-label="Document viewer">
+    <article
+      ref={articleRef}
+      className="document-article"
+      aria-label="Document viewer"
+    >
       <header className="document-article-header">
         <div className="document-article-stamp">
           <StatusChip tone="doc" label={docTypeLabel(doc.doc_type)} />
@@ -106,6 +134,15 @@ export default function DocumentViewer({
             title="Download as a .md file"
           >
             ↓ .md
+          </button>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={handleExportPdf}
+            disabled={exporting}
+            title="Download as a PDF file"
+          >
+            {exporting ? 'Exporting…' : '↓ PDF'}
           </button>
           <button
             type="button"
