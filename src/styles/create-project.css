@@ -1,0 +1,231 @@
+/* ===========================================
+   CreateProjectPage + ProjectForm
+   =========================================== */
+
+.create-project-page {
+    min-height: 100vh;
+    padding: var(--space-7) var(--space-10);
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.create-project-page-header {
+    margin-bottom: var(--space-7);
+    position: relative;
+    padding-bottom: var(--space-5);
+}
+
+.create-project-page-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-border-strong) 12%,
+        var(--color-border-strong) 88%,
+        transparent
+    );
+}
+
+.create-project-page-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+    margin-bottom: var(--space-3);
+}
+
+.create-project-page h1 {
+    font-size: 36px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-3);
+    line-height: 1.1;
+}
+
+.create-project-error {
+    background: var(--color-danger-soft);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+    border-left: 4px solid var(--color-danger);
+    color: var(--color-danger);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-5);
+}
+
+.create-project-form-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-7) var(--space-8);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ---- Form ---- */
+.project-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.project-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+}
+
+.project-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.project-field-wide {
+    grid-column: 1 / -1;
+}
+
+.project-field-audience {
+    grid-column: 1 / -1;
+    margin-top: var(--space-2);
+}
+
+.project-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-ink-muted);
+    font-weight: 500;
+}
+
+.project-input,
+.project-textarea {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.project-textarea {
+    font-family: var(--font-display);
+    font-size: 15.5px;
+    line-height: 1.55;
+    resize: vertical;
+    min-height: 140px;
+}
+
+.project-input:focus,
+.project-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.project-hint {
+    font-size: 0.78rem;
+    color: var(--color-ink-subtle);
+    font-family: var(--font-mono);
+    align-self: flex-end;
+}
+
+/* ---- Audience radios ---- */
+.audience-radios {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.audience-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.audience-radio:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-tint);
+}
+
+.audience-radio input[type='radio'] {
+    margin-top: 4px;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.audience-radio:has(input:checked) {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent-soft) 35%, var(--color-surface));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.audience-radio-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.audience-radio-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-ink);
+}
+
+.audience-radio-desc {
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+/* ---- Form actions ---- */
+.project-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-rule);
+}
+
+.back-button {
+    margin-bottom: var(--space-4);
+}
+
+@media (max-width: 900px) {
+    .create-project-page {
+        padding: var(--space-6);
+    }
+    .create-project-form-section {
+        padding: var(--space-5);
+    }
+    .project-form-grid,
+    .audience-radios {
+        grid-template-columns: 1fr;
+    }
+    .create-project-page h1 {
+        font-size: 28px;
+    }
+}

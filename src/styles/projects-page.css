@@ -1,0 +1,116 @@
+/* ===========================================
+   ProjectsPage — home / dashboard
+   Editorial / blueprint aesthetic.
+   =========================================== */
+
+.projects-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-page-header {
+    padding: var(--space-9) var(--space-10) var(--space-7);
+    position: relative;
+}
+
+.projects-page-header::after {
+    content: '';
+    position: absolute;
+    left: var(--space-10);
+    right: var(--space-10);
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-border-strong) 12%,
+        var(--color-border-strong) 88%,
+        transparent
+    );
+}
+
+.projects-page-header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.projects-page-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+    margin-bottom: var(--space-3);
+}
+
+.projects-page h1 {
+    font-size: 44px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-3);
+    line-height: 1.05;
+}
+
+.projects-page-section {
+    padding: var(--space-7) var(--space-10);
+    max-width: 920px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+}
+
+/* Reusable primary / ghost button styles live globally on .primary-button
+   and .ghost-button. The .spec-viewer.css .ghost-button block had a more
+   polished variant; mirror it here for the dashboard so buttons look
+   consistent across the app. */
+
+.primary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    border: 1px solid var(--color-accent);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.primary-button:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.primary-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.primary-button:disabled {
+    background-color: var(--color-border-strong);
+    border-color: var(--color-border-strong);
+    color: var(--color-ink-subtle);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+@media (max-width: 900px) {
+    .projects-page-header,
+    .projects-page-section {
+        padding-left: var(--space-6);
+        padding-right: var(--space-6);
+    }
+    .projects-page-header {
+        padding-top: var(--space-7);
+    }
+    .projects-page h1 {
+        font-size: 36px;
+    }
+}
