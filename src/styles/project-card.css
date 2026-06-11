@@ -111,9 +111,43 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-4);
 }
 
+/* ---- Card content blocks (new layout) ---- */
+.project-card-time-absolute {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-ink-subtle);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 4px;
+}
+
+.project-card-client {
+    font-size: 0.85rem;
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-2);
+}
+
+.project-card-client-name {
+    color: var(--color-ink);
+    font-weight: 500;
+}
+
+.project-card-requirement {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+    line-height: 1.5;
+    margin-bottom: var(--space-4);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ---- Chip primitive + tones ---- */
 .chip {
     display: inline-flex;
     align-items: center;
@@ -130,10 +164,20 @@
     line-height: 1.4;
 }
 
-.chip-type {
+.chip-type,
+.chip-audience {
     border-color: var(--color-accent-soft);
     color: var(--color-accent);
     background-color: color-mix(in srgb, var(--color-accent-soft) 30%, transparent);
+}
+
+.chip-doc {
+    border-color: var(--color-border-strong);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
 }
 
 .chip-stage {
@@ -148,25 +192,4 @@
     border-radius: 50%;
     background-color: var(--color-accent);
     flex-shrink: 0;
-}
-
-.project-card-footer {
-    margin-top: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--color-ink-subtle);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--color-rule);
-}
-
-.project-card-missing {
-    color: var(--color-warn);
-}
-
-.project-card-complete {
-    color: var(--color-success);
-    font-weight: 500;
 }
