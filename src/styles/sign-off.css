@@ -1,0 +1,87 @@
+/* ===========================================
+   SignOffBlock — closing block of a finished proposal.
+   The "stamp" of a real document.
+   =========================================== */
+
+.sign-off {
+    margin-top: var(--space-9);
+    padding-top: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.sign-off-rule {
+    width: 64px;
+    height: 2px;
+    background: var(--color-accent);
+    margin-bottom: var(--space-2);
+}
+
+.sign-off-headline {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    color: var(--color-ink);
+    margin: 0;
+    text-wrap: balance;
+}
+
+.sign-off-body {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+    max-width: 60ch;
+    text-wrap: pretty;
+    margin: 0;
+}
+
+.sign-off-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    max-width: 540px;
+}
+
+.sign-off-meta-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px dotted var(--color-rule);
+}
+
+.sign-off-meta-row:last-child {
+    border-bottom: 0;
+}
+
+.sign-off-meta-row dt {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-ink-subtle);
+    font-size: 0.7rem;
+}
+
+.sign-off-meta-row dd {
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+}
+
+@media (max-width: 900px) {
+    .sign-off-headline {
+        font-size: 26px;
+    }
+    .sign-off-meta-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}

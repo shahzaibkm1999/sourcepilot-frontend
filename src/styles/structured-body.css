@@ -1,0 +1,239 @@
+/* ===========================================
+   StructuredBody — chapter / block layout.
+   Replaces the bare <h1>/<h2>/<p> stream with
+   numbered chapters, drop caps, callouts, and
+   editorial list markers. This is what makes
+   the on-screen viewer feel like a finished
+   proposal document, not a markdown readme.
+   =========================================== */
+
+.structured-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+}
+
+.structured-body > .chapter:first-of-type {
+    /* The first chapter opens with a clean top edge — no extra
+       spacing pushing it away from the TOC above. */
+    margin-top: 0;
+}
+
+/* ---- Chapter ---- */
+.chapter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    position: relative;
+}
+
+.chapter-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+}
+
+.chapter-header-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+}
+
+.chapter-numeral {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--color-accent);
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.chapter-number {
+    font-weight: 500;
+}
+
+.chapter-title {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    color: var(--color-ink);
+    margin: 0;
+    text-wrap: balance;
+}
+
+.chapter-rule {
+    width: 48px;
+    height: 2px;
+    background: var(--color-accent);
+    margin-top: var(--space-1);
+}
+
+.chapter-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* ---- Paragraphs ---- */
+.chapter-paragraph {
+    font-family: var(--font-display);
+    font-size: 16.5px;
+    line-height: 1.75;
+    color: var(--color-ink);
+    margin: 0;
+    text-wrap: pretty;
+    hyphens: auto;
+}
+
+.chapter-paragraph--lead {
+    font-size: 1.075em;
+    line-height: 1.7;
+}
+
+.chapter-paragraph--lead::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    line-height: 0.9;
+    float: left;
+    margin: 0.05em 0.12em 0 0;
+    color: var(--color-accent);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.chapter-paragraph code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+.chapter-paragraph strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.chapter-paragraph em {
+    font-style: italic;
+    color: var(--color-ink);
+}
+
+/* ---- Lists ---- */
+.chapter-list {
+    font-family: var(--font-display);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-ink);
+    padding-left: var(--space-7);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.chapter-list li {
+    padding-left: var(--space-2);
+}
+
+.chapter-list--unordered li::marker {
+    color: var(--color-accent);
+    font-size: 0.9em;
+}
+
+.chapter-list--ordered li::marker {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.chapter-list li code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+/* ---- Callout (blockquote) ---- */
+.chapter-callout {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: var(--color-ink);
+    font-style: italic;
+    position: relative;
+    text-wrap: pretty;
+}
+
+.chapter-callout-mark {
+    font-family: var(--font-display);
+    font-size: 2.2em;
+    line-height: 0.8;
+    color: var(--color-accent);
+    opacity: 0.4;
+    flex-shrink: 0;
+    margin-top: 0.1em;
+}
+
+.chapter-callout-body {
+    flex: 1;
+}
+
+.chapter-callout-body strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+/* ---- Subheadings ---- */
+.chapter-h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-ink);
+    letter-spacing: -0.012em;
+    margin: var(--space-3) 0 0;
+    line-height: 1.3;
+}
+
+.chapter-h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-muted);
+    font-weight: 500;
+    margin: var(--space-3) 0 0;
+}
+
+@media (max-width: 900px) {
+    .chapter-title {
+        font-size: 24px;
+    }
+    .chapter-callout {
+        padding: var(--space-4) var(--space-5);
+    }
+}

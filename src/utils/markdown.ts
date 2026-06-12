@@ -83,7 +83,18 @@ export function renderMarkdown(md: string): string {
 }
 
 function inline(text: string): string {
-  return text
+  return renderMarkdownInline(text);
+}
+
+/**
+ * Apply inline Markdown syntax (bold, italic, code) to an already-
+ * plain string and HTML-escape the input first. Used by
+ * `StructuredBody` for block content that has already been
+ * classified — the `inline()` function inside `renderMarkdown` is
+ * for the block-level pass.
+ */
+export function renderMarkdownInline(text: string): string {
+  return escapeHtml(text)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/`([^`]+)`/g, '<code>$1</code>');

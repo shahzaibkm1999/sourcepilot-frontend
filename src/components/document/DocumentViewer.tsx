@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { ProjectDocument, Project, DocType } from '../../types';
-import { renderMarkdown } from '../../utils/markdown';
 import { docTypeLabel, slugify } from '../../utils/audience';
 import { exportElementAsPdf } from '../../utils/pdfExport';
-import { extractHeadings } from '../../utils/headings';
 import StatusChip from '../ui/StatusChip';
 import CoverPage from './CoverPage';
 import RunningHeader from './RunningHeader';
 import TableOfContents from './TableOfContents';
+import StructuredBody from './StructuredBody';
+import SignOffBlock from './SignOffBlock';
 import '../../styles/document-viewer.css';
 
 interface DocumentViewerProps {
@@ -55,7 +55,6 @@ export default function DocumentViewer({
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState(doc.content_markdown);
   const articleRef = useRef<HTMLElement>(null);
-  const html = renderMarkdown(doc.content_markdown);
 
   // Keep the edit draft in sync with the parent's `doc` whenever it
   // changes (e.g. after a save, or when the user navigates to a
@@ -166,8 +165,6 @@ export default function DocumentViewer({
     onDelete();
   };
 
-  const headings = extractHeadings(doc.content_markdown);
-
   return (
     <article
       ref={articleRef}
@@ -178,7 +175,7 @@ export default function DocumentViewer({
 
       <CoverPage project={project} doc={doc} />
 
-      <TableOfContents headings={headings} />
+      <TableOfContents markdown={doc.content_markdown} />
 
       {editing ? (
         <textarea
@@ -198,13 +195,11 @@ export default function DocumentViewer({
           </p>
         </div>
       ) : (
-        <div
-          className="document-article-body"
-          data-document-body="true"
-          // The Markdown source comes from our own backend (DeepSeek).
-          // renderMarkdown escapes all input before applying syntax.
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <StructuredBody markdown={doc.content_markdown} />
+      )}
+
+      {!editing && doc.status !== 'pending' && (
+        <SignOffBlock project={project} doc={doc} />
       )}
 
       <footer className="document-article-footer">
