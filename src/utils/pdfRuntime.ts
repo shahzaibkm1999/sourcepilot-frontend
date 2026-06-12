@@ -11,9 +11,9 @@
  * call resolves a module-level promise; subsequent calls reuse it.
  *
  * Fonts registered (all under public/fonts/, shipped with the app):
- *   - Spectral — display serif (Regular, Italic, Bold)
- *   - IBMPlexSans — body sans (Regular, Italic, Bold, SemiBold)
- *   - IBMPlexMono — mono (Regular, Italic, Bold)
+ *   - Spectral — display serif (Regular, Italic, Bold, BoldItalic)
+ *   - IBMPlexSans — body sans (Regular, Italic, Bold, BoldItalic, SemiBold)
+ *   - IBMPlexMono — mono (Regular, Italic, Bold, BoldItalic)
  *
  * Article VI: pdfmake is the only PDF library we use; the bespoke
  * html2canvas+jspdf pipeline was retired (see
@@ -29,13 +29,16 @@ import type { TFontDictionary } from 'pdfmake/interfaces';
 import spectralRegularUrl from '../../public/fonts/Spectral-Regular.ttf?url';
 import spectralItalicUrl from '../../public/fonts/Spectral-Italic.ttf?url';
 import spectralBoldUrl from '../../public/fonts/Spectral-Bold.ttf?url';
+import spectralBoldItalicUrl from '../../public/fonts/Spectral-BoldItalic.ttf?url';
 import plexSansRegularUrl from '../../public/fonts/IBMPlexSans-Regular.ttf?url';
 import plexSansItalicUrl from '../../public/fonts/IBMPlexSans-Italic.ttf?url';
 import plexSansBoldUrl from '../../public/fonts/IBMPlexSans-Bold.ttf?url';
+import plexSansBoldItalicUrl from '../../public/fonts/IBMPlexSans-BoldItalic.ttf?url';
 import plexSansSemiBoldUrl from '../../public/fonts/IBMPlexSans-SemiBold.ttf?url';
 import plexMonoRegularUrl from '../../public/fonts/IBMPlexMono-Regular.ttf?url';
 import plexMonoItalicUrl from '../../public/fonts/IBMPlexMono-Italic.ttf?url';
 import plexMonoBoldUrl from '../../public/fonts/IBMPlexMono-Bold.ttf?url';
+import plexMonoBoldItalicUrl from '../../public/fonts/IBMPlexMono-BoldItalic.ttf?url';
 
 type PdfMakeModule = (typeof import('pdfmake/build/pdfmake.js'))['default'];
 
@@ -84,17 +87,24 @@ async function bootstrap(): Promise<PdfRuntime> {
   // Register custom fonts. Each TTF is fetched, base64-encoded, and
   // dropped into pdfmake's virtual file system under a stable name,
   // then the `fonts` dictionary points pdfmake at those names.
+  // Every family needs the full set {normal, italics, bold, bolditalics}
+  // — pdfmake looks up bolditalics for any text that has both bold and
+  // italic styling, even if no such text appears in the current doc
+  // (the lookup is part of style resolution, not per-render).
   const fontAssets: Array<[string, string]> = [
     ['Spectral-Regular.ttf', spectralRegularUrl],
     ['Spectral-Italic.ttf', spectralItalicUrl],
     ['Spectral-Bold.ttf', spectralBoldUrl],
+    ['Spectral-BoldItalic.ttf', spectralBoldItalicUrl],
     ['IBMPlexSans-Regular.ttf', plexSansRegularUrl],
     ['IBMPlexSans-Italic.ttf', plexSansItalicUrl],
     ['IBMPlexSans-Bold.ttf', plexSansBoldUrl],
+    ['IBMPlexSans-BoldItalic.ttf', plexSansBoldItalicUrl],
     ['IBMPlexSans-SemiBold.ttf', plexSansSemiBoldUrl],
     ['IBMPlexMono-Regular.ttf', plexMonoRegularUrl],
     ['IBMPlexMono-Italic.ttf', plexMonoItalicUrl],
     ['IBMPlexMono-Bold.ttf', plexMonoBoldUrl],
+    ['IBMPlexMono-BoldItalic.ttf', plexMonoBoldItalicUrl],
   ];
 
   const encodings = await Promise.all(
@@ -114,21 +124,28 @@ async function bootstrap(): Promise<PdfRuntime> {
       normal: 'Spectral-Regular.ttf',
       italics: 'Spectral-Italic.ttf',
       bold: 'Spectral-Bold.ttf',
+      bolditalics: 'Spectral-BoldItalic.ttf',
     },
     IBMPlexSans: {
       normal: 'IBMPlexSans-Regular.ttf',
       italics: 'IBMPlexSans-Italic.ttf',
       bold: 'IBMPlexSans-Bold.ttf',
+      bolditalics: 'IBMPlexSans-BoldItalic.ttf',
     },
     IBMPlexSansSemiBold: {
+      // No SemiBold + italic variant ships for IBM Plex Sans, so we
+      // reuse the regular BoldItalic for SemiBold-italic too. Same
+      // visual weight class for the on-screen editorial design.
       normal: 'IBMPlexSans-SemiBold.ttf',
       italics: 'IBMPlexSans-Italic.ttf',
       bold: 'IBMPlexSans-SemiBold.ttf',
+      bolditalics: 'IBMPlexSans-BoldItalic.ttf',
     },
     IBMPlexMono: {
       normal: 'IBMPlexMono-Regular.ttf',
       italics: 'IBMPlexMono-Italic.ttf',
       bold: 'IBMPlexMono-Bold.ttf',
+      bolditalics: 'IBMPlexMono-BoldItalic.ttf',
     },
     // Reuse Roboto as a last-resort fallback. We don't reference it
     // from any doc definition, but having it registered means pdfmake
@@ -138,6 +155,7 @@ async function bootstrap(): Promise<PdfRuntime> {
       normal: 'Roboto-Regular.ttf',
       italics: 'Roboto-Italic.ttf',
       bold: 'Roboto-Medium.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf',
     },
   };
 
