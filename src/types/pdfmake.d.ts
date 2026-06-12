@@ -17,6 +17,22 @@ declare module 'pdfmake/build/pdfmake.js' {
     vfs: Record<string, string>;
     fonts: TFontDictionary;
     createPdf(def: TDocumentDefinitions): PdfDocument;
+    /**
+     * Write font files into pdfmake's internal virtual file system.
+     * Each value is either a base64-encoded string (when `encoding`
+     * is omitted) or `{ data, encoding }`. Keys are the filenames
+     * referenced by the `fonts` dictionary. Calling this is the
+     * supported way to register custom fonts at runtime in 0.3.x;
+     * direct `pdfMake.vfs[name] = ...` is a no-op because the
+     * class has no `vfs` property — storage lives on the
+     * internal virtualfs instance.
+     */
+    addVirtualFileSystem(
+      vfs: Record<
+        string,
+        string | { data: string; encoding?: 'base64' | 'utf-8' }
+      >,
+    ): void;
   }
 
   export interface PdfDocument {

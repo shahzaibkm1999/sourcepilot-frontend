@@ -64,26 +64,21 @@ async function bootstrap(): Promise<PdfRuntime> {
     (pdfMakeModuleRaw as { default?: PdfMakeModule }).default ??
     (pdfMakeModuleRaw as unknown as PdfMakeModule);
 
-  // pdfmake's bundled Roboto vfs is the default font dictionary. We
-  // start from there and overlay our own fonts. pdfmake 0.3.x ships
-  // `vfs_fonts.js` as a UMD module whose `module.exports` IS the vfs
-  // Record<string,string>; older versions wrapped it in
-  // `{ pdfMake: { vfs } }`. `extractVfs` accepts all three shapes.
-  const vfs = extractVfs(vfsFontsModule as { default?: unknown });
-  if (vfs) {
-    pdfMakeModule.vfs = vfs;
-  } else {
-    // Fallback: start from an empty vfs so the subsequent per-font
-    // assignments don't blow up. pdfmake also has a side-effect path
-    // in vfs_fonts.js that calls `globalThis.pdfMake.addVirtualFileSystem(vfs)`
-    // — if that ran (it requires `window.pdfMake` to be set by the
-    // pdfmake.js import), we pick the vfs up from the global.
-    const globalVfs = (globalThis as { pdfMake?: { vfs?: Record<string, string> } }).pdfMake?.vfs;
-    if (globalVfs) {
-      pdfMakeModule.vfs = { ...globalVfs };
-    } else {
-      pdfMakeModule.vfs = {};
-    }
+  // Register the bundled Roboto vfs. The pdfmake 0.3.x singleton
+  // exposes `addVirtualFileSystem(...)` which writes into the SAME
+  // `virtualfs` storage that `createPdf` reads from at generation
+  // time. (Assigning to `pdfMake.vfs[name] = ...` is a no-op because
+  // the class has no `vfs` property — the storage lives on
+  // `this.virtualfs.storage`, and `addVirtualFileSystem` is the only
+  // supported way to write to it.) The vfs_fonts.js module already
+  // calls `addVirtualFileSystem(robotoVfs)` as a side effect at import
+  // time, but the order of side-effects vs. our dynamic imports is
+  // not guaranteed, so we call it again here as an explicit
+  // registration. `extractVfs` returns the raw vfs Record for all
+  // three module shapes (raw, `{vfs}`, `{pdfMake:{vfs}}`).
+  const robotoVfs = extractVfs(vfsFontsModule as { default?: unknown });
+  if (robotoVfs) {
+    pdfMakeModule.addVirtualFileSystem(robotoVfs);
   }
 
   // Register custom fonts. Each TTF is fetched, base64-encoded, and
@@ -106,9 +101,13 @@ async function bootstrap(): Promise<PdfRuntime> {
     fontAssets.map(async ([name, url]) => [name, await fetchAsBase64(url)] as const),
   );
 
+  // The custom-vfs is a `Record<name, base64>`. Pass it to
+  // `addVirtualFileSystem` so the keys land in pdfmake's storage.
+  const customVfs: Record<string, string> = {};
   for (const [name, b64] of encodings) {
-    pdfMakeModule.vfs[name] = b64;
+    customVfs[name] = b64;
   }
+  pdfMakeModule.addVirtualFileSystem(customVfs);
 
   const fonts: TFontDictionary = {
     Spectral: {
@@ -144,9 +143,12 @@ async function bootstrap(): Promise<PdfRuntime> {
 
   pdfMakeModule.fonts = fonts;
 
+  // `addVirtualFileSystem` doesn't expose the vfs back as a property,
+  // so there's no `pdfMakeModule.vfs` to read. We return the keys we
+  // registered as a debugging hint.
   return {
     pdfMake: pdfMakeModule,
-    fontKeys: Object.keys(pdfMakeModule.vfs),
+    fontKeys: Object.keys(customVfs),
   };
 }
 
