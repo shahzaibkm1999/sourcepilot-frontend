@@ -3,7 +3,11 @@ import { ProjectDocument, Project, DocType } from '../../types';
 import { renderMarkdown } from '../../utils/markdown';
 import { docTypeLabel, slugify } from '../../utils/audience';
 import { exportElementAsPdf } from '../../utils/pdfExport';
+import { extractHeadings } from '../../utils/headings';
 import StatusChip from '../ui/StatusChip';
+import CoverPage from './CoverPage';
+import RunningHeader from './RunningHeader';
+import TableOfContents from './TableOfContents';
 import '../../styles/document-viewer.css';
 
 interface DocumentViewerProps {
@@ -162,25 +166,55 @@ export default function DocumentViewer({
     onDelete();
   };
 
+  const headings = extractHeadings(doc.content_markdown);
+
   return (
     <article
       ref={articleRef}
       className="document-article"
       aria-label="Document viewer"
     >
-      <header className="document-article-header">
-        <div className="document-article-stamp">
+      <RunningHeader project={project} doc={doc} />
+
+      <CoverPage project={project} doc={doc} />
+
+      <TableOfContents headings={headings} />
+
+      {editing ? (
+        <textarea
+          className="document-article-edit"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          disabled={saving}
+          rows={24}
+          spellCheck
+        />
+      ) : doc.status === 'pending' ? (
+        <div className="document-article-pending">
+          <div className="document-article-pending-spinner" aria-hidden="true" />
+          <p>
+            Generating your <strong>{docTypeLabel(doc.doc_type)}</strong>…
+            this usually takes 10–30 seconds.
+          </p>
+        </div>
+      ) : (
+        <div
+          className="document-article-body"
+          data-document-body="true"
+          // The Markdown source comes from our own backend (DeepSeek).
+          // renderMarkdown escapes all input before applying syntax.
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
+
+      <footer className="document-article-footer">
+        <div className="document-article-footer-meta">
           <StatusChip tone="doc" label={docTypeLabel(doc.doc_type)} />
-        </div>
-        <h2 className="document-article-title">{project.name}</h2>
-        <div className="document-article-subtitle muted">
-          {docTypeLabel(doc.doc_type)}
-        </div>
-        <div className="document-article-meta muted">
-          Generated{' '}
-          <time dateTime={doc.created_at}>
-            {new Date(doc.created_at).toLocaleString()}
-          </time>
+          <span className="muted">
+            Generated <time dateTime={doc.created_at}>
+              {new Date(doc.created_at).toLocaleString()}
+            </time>
+          </span>
         </div>
         <div className="document-article-actions">
           {editing ? (
@@ -283,33 +317,7 @@ export default function DocumentViewer({
             </>
           )}
         </div>
-      </header>
-
-      {editing ? (
-        <textarea
-          className="document-article-edit"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          disabled={saving}
-          rows={24}
-          spellCheck
-        />
-      ) : doc.status === 'pending' ? (
-        <div className="document-article-pending">
-          <div className="document-article-pending-spinner" aria-hidden="true" />
-          <p>
-            Generating your <strong>{docTypeLabel(doc.doc_type)}</strong>…
-            this usually takes 10–30 seconds.
-          </p>
-        </div>
-      ) : (
-        <div
-          className="document-article-body"
-          // The Markdown source comes from our own backend (DeepSeek).
-          // renderMarkdown escapes all input before applying syntax.
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      )}
+      </footer>
     </article>
   );
 }

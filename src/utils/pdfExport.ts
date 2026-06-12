@@ -8,22 +8,28 @@ import html2canvas from 'html2canvas';
  *   1. Snapshot the element into a canvas with html2canvas (scale 2
  *      for crisp text on retina displays, white background so the
  *      snapshot looks like paper in any PDF viewer). An `onclone`
- *      callback sanitises the cloned document first — html2canvas
- *      v1.4.1 doesn't support CSS `color-mix()`, so we resolve any
- *      such calls to `rgb(...)` against the live page's computed
- *      style before snapshotting. We also remove the action button
- *      row from the clone; buttons don't belong in a printable PDF.
+ *      callback sanitises the cloned document first:
+ *        - strips `.document-article-actions` (UI, not printable)
+ *        - resolves every `color-mix(...)` call in the cloned
+ *          stylesheets to a concrete `rgb(...)` so html2canvas's
+ *          parser doesn't choke
  *   2. Create a portrait A4 jsPDF document.
- *   3. Tile the canvas across as many pages as needed by slicing it
- *      vertically and adding one `addImage` per page. A naive
- *      single-page export would shrink long proposals to a tiny
- *      thumbnail; the tile loop is the standard pattern for this
- *      stack.
+ *   3. Tile the canvas across as many pages as needed by slicing
+ *      it vertically and adding one `addImage` per page.
  *
- * The function resolves once `jsPDF.save()` has been called. The
- * browser handles the actual download dialog; we don't return a
- * Blob. Errors propagate to the caller so the button can show an
- * alert and re-enable itself.
+ * Why we resolve color-mix() manually:
+ *   html2canvas v1.4.1 doesn't support the CSS `color-mix()`
+ *   function and throws "unsupported color function 'color'".
+ *   The app uses `color-mix()` in 6 stylesheets (border, background,
+ *   box-shadow, etc.), so we walk every stylesheet rule, find any
+ *   property whose value contains `color-mix(`, and rewrite the
+ *   value to a concrete `rgb(...)` or `rgba(...)` that html2canvas
+ *   can parse. The resolution uses the live page's `getComputedStyle`
+ *   — the browser does the math for us; we just copy the result.
+ *
+ * The function resolves once `jsPDF.save()` has been called.
+ * Errors propagate to the caller so the button can show an alert
+ * and re-enable itself.
  */
 export async function exportElementAsPdf(
   element: HTMLElement,
@@ -35,17 +41,19 @@ export async function exportElementAsPdf(
     useCORS: true,
     onclone: (clonedDoc) => {
       // 1. Strip the action bar (Copy / Download / Export PDF /
-      //    Edit / Delete / Regenerate / Close) from the cloned
-      //    article — they're UI, not part of the printable doc.
+      //    Edit / Delete / Regenerate / Close) and the running
+      //    header from the cloned article — they're UI, not part
+      //    of the printable doc.
       const actions = clonedDoc.querySelectorAll('.document-article-actions');
       actions.forEach((el) => el.parentElement?.removeChild(el));
+      const running = clonedDoc.querySelectorAll('.running-header');
+      running.forEach((el) => el.parentElement?.removeChild(el));
 
       // 2. Resolve every `color-mix(...)` call in the cloned
       //    stylesheets to a concrete `rgb(...)` so html2canvas's
-      //    parser doesn't choke. We use a hidden probe element in
-      //    the LIVE document to compute the resolved value (the
-      //    clone's variables aren't materialised at the time
-      //    onclone fires).
+      //    parser doesn't choke. The probe is a hidden div in the
+      //    LIVE document (the clone's CSS variables aren't fully
+      //    materialised at the time onclone fires).
       const probe = document.createElement('div');
       probe.style.position = 'absolute';
       probe.style.visibility = 'hidden';
@@ -71,6 +79,11 @@ export async function exportElementAsPdf(
             const rule = rules[i];
             if (!(rule instanceof CSSStyleRule)) continue;
             const style = rule.style;
+            // Iterate every declared property. For each one whose
+            // value contains `color-mix(`, resolve the value to a
+            // concrete rgb/rgba and write it back. This handles
+            // border, background, box-shadow, etc. — not just
+            // `color`.
             for (let j = 0; j < style.length; j += 1) {
               const prop = style.item(j);
               const value = style.getPropertyValue(prop);
@@ -145,6 +158,31 @@ export async function exportElementAsPdf(
 
     const imgData = pageCanvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', 0, 0, pageWidthPt, sliceHeightPt);
+
+    // Page-numbered footer. Editorial style: small mono italic
+    // text in the bottom margin, with a thin rule above it on
+    // every page except the first (cover page convention). jsPDF
+    // gives us text in points; we sit ~24pt from the bottom edge
+    // and right-align to the right margin (~32pt from the right).
+    const isCover = page === 0;
+    if (!isCover) {
+      const footerY = pageHeightPt - 24;
+      const marginX = 32;
+      pdf.setDrawColor(220, 211, 188); // matches --color-border
+      pdf.setLineWidth(0.5);
+      pdf.line(
+        marginX,
+        footerY - 12,
+        pageWidthPt - marginX,
+        footerY - 12,
+      );
+      pdf.setFont('helvetica', 'italic');
+      pdf.setFontSize(8);
+      pdf.setTextColor(90, 83, 78); // matches --color-ink-muted
+      const label = `Page ${page + 1} of ${totalPages}`;
+      const textWidth = pdf.getTextWidth(label);
+      pdf.text(label, pageWidthPt - marginX - textWidth, footerY);
+    }
   }
 
   pdf.save(filename);
@@ -152,10 +190,19 @@ export async function exportElementAsPdf(
 
 /**
  * Resolve a CSS property value containing one or more
- * `color-mix(...)` calls into an `rgb(...)` form, by asking the
- * browser's own `getComputedStyle` to evaluate it. Returns the
- * original value unchanged if no substitution was possible (e.g.
- * the browser doesn't support `color-mix`).
+ * `color-mix(...)` calls into an `rgb(...)` or `rgba(...)` form, by
+ * asking the browser's own `getComputedStyle` to evaluate it.
+ *
+ * We set the value on the probe's `color` property as a way to ask
+ * the browser "what's the resolved color of this string?" — `color`
+ * is always a color-typed property, so the browser accepts any
+ * color syntax for it. The computed value comes back as
+ * `rgb(...)` or `rgba(...)` if the browser supports `color-mix`,
+ * and we copy that back over the original property (whatever it
+ * was: `color`, `border-color`, `background-color`, etc.).
+ *
+ * Returns the original value unchanged if no substitution was
+ * possible (browser doesn't support `color-mix`).
  */
 function resolveColorMix(probe: HTMLElement, value: string): string | null {
   if (typeof CSS === 'undefined' || !('supports' in CSS)) return null;
@@ -164,9 +211,11 @@ function resolveColorMix(probe: HTMLElement, value: string): string | null {
   probe.style.color = value;
   const computed = getComputedStyle(probe).color;
   // `computed` will be `rgb(...)` or `rgba(...)` if the browser
-  // resolved the value successfully; otherwise it falls back to
-  // the inherited color and equals an empty value or the original
-  // string.
+  // resolved the value successfully. If the browser failed to
+  // parse the value, the computed value falls back to the
+  // inherited color (typically `rgb(0, 0, 0)`) — we can't
+  // distinguish that from a successful parse, so we check that
+  // the value is non-empty and starts with `rgb`.
   if (!computed.startsWith('rgb')) return null;
   return computed;
 }

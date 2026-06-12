@@ -1,0 +1,126 @@
+/* ===========================================
+   CoverPage — the document's first "page".
+   Editorial cover, distinct from the body.
+   =========================================== */
+
+.cover-page {
+    padding: var(--space-10) 0 var(--space-9);
+    margin-bottom: var(--space-9);
+    border-bottom: 1px solid var(--color-rule);
+    position: relative;
+}
+
+.cover-page::after {
+    /* Faint accent rule under the cover to mark the page break */
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-accent) 50%,
+        transparent
+    );
+    opacity: 0.3;
+}
+
+.cover-page-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-ink-subtle);
+    margin-bottom: var(--space-7);
+}
+
+.cover-page-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    color: var(--color-ink);
+    margin-bottom: var(--space-5);
+    text-wrap: balance;
+}
+
+.cover-page-client {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+}
+
+.cover-page-client-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-ink-subtle);
+}
+
+.cover-page-client-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+}
+
+.cover-page-rule {
+    width: 64px;
+    height: 2px;
+    background: var(--color-accent);
+    margin-bottom: var(--space-7);
+}
+
+.cover-page-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+.cover-page-meta-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px dotted var(--color-rule);
+}
+
+.cover-page-meta-row:last-child {
+    border-bottom: 0;
+}
+
+.cover-page-meta-row dt {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-ink-subtle);
+    font-size: 0.7rem;
+}
+
+.cover-page-meta-row dd {
+    margin: 0;
+    color: var(--color-ink);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-mono);
+}
+
+@media (max-width: 900px) {
+    .cover-page-title {
+        font-size: 38px;
+    }
+    .cover-page-meta-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}

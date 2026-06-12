@@ -246,3 +246,51 @@
 @keyframes document-article-pending-spin {
     to { transform: rotate(360deg); }
 }
+
+/* ---- Footer (new) ----
+   The footer holds the meta + the action bar (Copy / Download /
+   Export PDF / Edit / Delete / Regenerate / Close). It sits at
+   the END of the article now (was previously at the top), which
+   is the more natural reading flow for a real document. */
+.document-article-footer {
+    margin-top: var(--space-9);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.document-article-footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.document-article-footer-meta .muted {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-subtle);
+}
+
+.document-article-footer-meta time {
+    color: var(--color-ink-subtle);
+}
+
+/* The footer reuses the existing .document-article-actions styles
+   for the action bar; the dashed top border still reads as a
+   separator. In the new structure the actions live in the footer
+   instead of the header. */
+.document-article-footer .document-article-actions {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+}
