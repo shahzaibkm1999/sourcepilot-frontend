@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Project } from '../../types';
-import { api, PAGE_SIZE } from '../../services/api';
+import { useEffect } from 'react';
 import ProjectCard from './ProjectCard';
 import EmptyState from '../ui/EmptyState';
+import {
+  useProjectsInfinite,
+  flattenProjects,
+  useInvalidateProjectsList,
+} from '../../services/useProjects';
 import '../../styles/project-list.css';
 
 interface ProjectListProps {
@@ -13,89 +16,100 @@ interface ProjectListProps {
 /**
  * ProjectList
  * -----------
- * The Projects page's main list. Renders every loaded project as
- * a ProjectCard. The list is paginated — initial load fetches
- * `PAGE_SIZE` rows, and a "Load more" button at the bottom
- * appends the next page when there's more to show.
+ * The Projects page's main list, powered by TanStack Query.
  *
- * Pagination state lives here (not in App) because no other view
- * needs it. Navigating back to this page re-runs the mount effect
- * and re-fetches the first page, which is how create / edit /
- * delete get reflected without a shared store.
+ * What we get from `useInfiniteQuery`:
+ *   - Stale-while-revalidate: the list shows cached data instantly on
+ *     remount (e.g. after creating a project and navigating back), and
+ *     refetches in the background if the cache is older than `staleTime`.
+ *   - Dedup: two simultaneous mounts share one in-flight request.
+ *   - `Load more` is just `fetchNextPage()` — no manual offset state.
+ *   - Refetch on window focus: list stays current across tabs.
+ *
+ * What this component still owns:
+ *   - The empty / loading / error UI.
+ *   - The "§ I — Your projects" section header.
+ *   - The "showing N of M" count.
+ *
+ * The detail page deliberately does NOT use TanStack Query — it polls
+ * `GET /api/projects/:id` for `pending` documents, which is a
+ * different concern (state machine, not list-of-things). Mixing the
+ * two would make the polling harder to reason about for no gain.
  */
 export default function ProjectList({ onSelectProject, onNewProject }: ProjectListProps) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+  } = useProjectsInfinite();
 
   /**
-   * Concurrency guard. React state updates are async, so two fast
-   * clicks on "Load more" can both pass the `loadingMore` state
-   * check before either has flipped it to true. A ref is updated
-   * synchronously, so the second call sees the lock immediately.
+   * When the user returns from the create page, the list may be stale
+   * (the new project isn't in the cache yet). A focused refetch is
+   * what we want — it doesn't block the cached data, just runs in
+   * the background and swaps in the new row when it lands.
    */
-  const inFlight = useRef(false);
-
-  const loadPage = useCallback(
-    async (nextOffset: number, append: boolean) => {
-      if (inFlight.current) return;
-      inFlight.current = true;
-      if (append) setLoadingMore(true);
-      else setLoading(true);
-      setError(null);
-      try {
-        const result = await api.listProjects({ limit: PAGE_SIZE, offset: nextOffset });
-        setProjects((prev) => (append ? [...prev, ...result.projects] : result.projects));
-        setTotal(result.total);
-        // Empty-page guard: if the server claims `hasMore` but
-        // returned 0 rows (e.g. rows were deleted between this
-        // call and the previous one), treat as "end of list" so
-        // we don't loop on the same offset.
-        const trustHasMore = result.hasMore && result.projects.length > 0;
-        setHasMore(trustHasMore);
-        setOffset(nextOffset + result.projects.length);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load projects');
-      } finally {
-        if (append) setLoadingMore(false);
-        else setLoading(false);
-        inFlight.current = false;
-      }
-    },
-    [],
-  );
-
-  // Initial load. Re-runs on mount (so navigating back from
-  // create / edit / delete refetches the first page).
+  const invalidateList = useInvalidateProjectsList();
   useEffect(() => {
-    loadPage(0, false);
-  }, [loadPage]);
+    // On every mount, mark the list as potentially stale. The query
+    // client decides whether to refetch based on staleTime + focus.
+    invalidateList();
+  }, [invalidateList]);
 
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) return;
-    loadPage(offset, true);
-  };
+  const { projects, total } = flattenProjects(data);
 
-  return (
-    <div className="project-list">
-      <header className="project-list-internal-header">
+  if (isPending) {
+    return (
+      <div className="project-list">
+        <header className="project-list-internal-header">
+          <div>
+            <div className="project-list-internal-title">§ I — Your projects</div>
+          </div>
+        </header>
+        <p className="project-list-status muted">Loading projects…</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="project-list">
+        <header className="project-list-internal-header">
+          <div>
+            <div className="project-list-internal-title">§ I — Your projects</div>
+          </div>
+        </header>
+        <p className="project-list-error">
+          ⚠ {error instanceof Error ? error.message : 'Failed to load projects'}
+        </p>
         <div>
-          <div className="project-list-internal-title">§ I — Your projects</div>
-          {!loading && !error && projects.length > 0 && (
-            <div className="project-list-internal-count">
-              showing {projects.length} of {total}
-            </div>
-          )}
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => {
+              void refetch();
+            }}
+          >
+            Retry
+          </button>
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      {loading && <p className="project-list-status muted">Loading projects…</p>}
-      {error && <p className="project-list-error">⚠ {error}</p>}
-      {!loading && !error && projects.length === 0 && (
+  if (projects.length === 0) {
+    return (
+      <div className="project-list">
+        <header className="project-list-internal-header">
+          <div>
+            <div className="project-list-internal-title">§ I — Your projects</div>
+          </div>
+        </header>
         <EmptyState
           eyebrow="no projects"
           title="Nothing here yet."
@@ -110,7 +124,20 @@ export default function ProjectList({ onSelectProject, onNewProject }: ProjectLi
             </button>
           }
         />
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="project-list">
+      <header className="project-list-internal-header">
+        <div>
+          <div className="project-list-internal-title">§ I — Your projects</div>
+          <div className="project-list-internal-count">
+            showing {projects.length} of {total}
+          </div>
+        </div>
+      </header>
 
       <div className="project-list-grid reveal-on-mount">
         {projects.map((project) => (
@@ -122,22 +149,22 @@ export default function ProjectList({ onSelectProject, onNewProject }: ProjectLi
         ))}
       </div>
 
-      {!loading && !error && projects.length > 0 && (
-        <div className="project-list-loadmore">
-          {hasMore ? (
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-            >
-              {loadingMore ? 'Loading…' : 'Load more'}
-            </button>
-          ) : (
-            <p className="project-list-loadmore-count muted">end of list</p>
-          )}
-        </div>
-      )}
+      <div className="project-list-loadmore">
+        {hasNextPage ? (
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => {
+              void fetchNextPage();
+            }}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading…' : 'Load more'}
+          </button>
+        ) : (
+          <p className="project-list-loadmore-count muted">end of list</p>
+        )}
+      </div>
     </div>
   );
 }
