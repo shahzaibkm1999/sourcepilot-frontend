@@ -31,9 +31,12 @@ declare module 'pdfmake/build/pdfmake.js' {
 }
 
 declare module 'pdfmake/build/vfs_fonts.js' {
+  // pdfmake 0.3.x: `module.exports = vfs` (the vfs is the default)
+  // Older versions wrapped it; accept all three shapes.
   const vfsFonts:
-    | { pdfMake: { vfs: Record<string, string> } }
-    | { vfs: Record<string, string> };
+    | Record<string, string>
+    | { vfs: Record<string, string> }
+    | { pdfMake: { vfs: Record<string, string> } };
   export default vfsFonts;
 }
 

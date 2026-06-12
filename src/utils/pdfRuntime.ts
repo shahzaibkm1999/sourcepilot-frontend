@@ -58,15 +58,32 @@ async function bootstrap(): Promise<PdfRuntime> {
   // export. Dynamic import keeps it out of the main bundle.
   const [pdfMakeModuleRaw, vfsFontsModule] = await Promise.all([
     import('pdfmake/build/pdfmake.js'),
-    import('pdfmake/build/vfs_fonts.js') as Promise<{ default?: { pdfMake?: { vfs: Record<string, string> } } }>,
+    import('pdfmake/build/vfs_fonts.js'),
   ]);
-  const pdfMakeModule = (pdfMakeModuleRaw as { default?: PdfMakeModule }).default ?? (pdfMakeModuleRaw as unknown as PdfMakeModule);
+  const pdfMakeModule: PdfMakeModule =
+    (pdfMakeModuleRaw as { default?: PdfMakeModule }).default ??
+    (pdfMakeModuleRaw as unknown as PdfMakeModule);
 
   // pdfmake's bundled Roboto vfs is the default font dictionary. We
-  // start from there and overlay our own fonts.
-  const vfs = extractVfs(vfsFontsModule);
+  // start from there and overlay our own fonts. pdfmake 0.3.x ships
+  // `vfs_fonts.js` as a UMD module whose `module.exports` IS the vfs
+  // Record<string,string>; older versions wrapped it in
+  // `{ pdfMake: { vfs } }`. `extractVfs` accepts all three shapes.
+  const vfs = extractVfs(vfsFontsModule as { default?: unknown });
   if (vfs) {
     pdfMakeModule.vfs = vfs;
+  } else {
+    // Fallback: start from an empty vfs so the subsequent per-font
+    // assignments don't blow up. pdfmake also has a side-effect path
+    // in vfs_fonts.js that calls `globalThis.pdfMake.addVirtualFileSystem(vfs)`
+    // — if that ran (it requires `window.pdfMake` to be set by the
+    // pdfmake.js import), we pick the vfs up from the global.
+    const globalVfs = (globalThis as { pdfMake?: { vfs?: Record<string, string> } }).pdfMake?.vfs;
+    if (globalVfs) {
+      pdfMakeModule.vfs = { ...globalVfs };
+    } else {
+      pdfMakeModule.vfs = {};
+    }
   }
 
   // Register custom fonts. Each TTF is fetched, base64-encoded, and
@@ -133,15 +150,32 @@ async function bootstrap(): Promise<PdfRuntime> {
   };
 }
 
-function extractVfs(mod: { default?: { pdfMake?: { vfs: Record<string, string> } } }): Record<string, string> | null {
-  // pdfmake 0.3.x ships vfs_fonts with a default export that may be
-  // either `{ pdfMake: { vfs } }` (older) or `{ vfs }` (newer). Be
-  // defensive about the shape so a pdfmake minor bump doesn't break us.
+function extractVfs(mod: { default?: unknown }): Record<string, string> | null {
+  // pdfmake 0.3.x ships vfs_fonts with `module.exports = vfs` — the
+  // default export IS the vfs Record. Older versions wrapped it as
+  // `{ vfs }` or `{ pdfMake: { vfs } }`. We try all three.
   const d = mod.default;
-  if (!d) return null;
-  if ('vfs' in d && d.vfs) return d.vfs as Record<string, string>;
-  if ('pdfMake' in d && d.pdfMake && 'vfs' in d.pdfMake) {
-    return d.pdfMake.vfs as Record<string, string>;
+  if (!d || typeof d !== 'object') return null;
+  const obj = d as Record<string, unknown>;
+
+  // Wrapped shapes first.
+  if (obj.vfs && typeof obj.vfs === 'object') {
+    return obj.vfs as Record<string, string>;
+  }
+  if (obj.pdfMake && typeof obj.pdfMake === 'object') {
+    const pm = obj.pdfMake as Record<string, unknown>;
+    if (pm.vfs && typeof pm.vfs === 'object') {
+      return pm.vfs as Record<string, string>;
+    }
+  }
+
+  // Unwrapped: the default itself looks like a vfs. Heuristic — at
+  // least one key matches a common font extension.
+  if (Object.keys(obj).length > 0) {
+    const hasFontKey = Object.keys(obj).some(
+      (k) => typeof k === 'string' && /\.ttf$|\.otf$/.test(k),
+    );
+    if (hasFontKey) return obj as unknown as Record<string, string>;
   }
   return null;
 }
