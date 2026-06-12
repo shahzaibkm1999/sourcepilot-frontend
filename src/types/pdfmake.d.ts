@@ -98,17 +98,27 @@ declare module 'pdfmake/interfaces' {
   export interface TableContent {
     table: {
       widths: Array<number | string | 'auto' | '*'>;
-      body: Array<Array<{ text?: string | Content[]; style?: string; fillColor?: string; border?: [boolean, boolean, boolean, boolean]; stack?: Content[]; margin?: [number, number, number, number] | number }>>;
+      // `headerRows: N` repeats the first N body rows on every page
+      // when the table spans a page break. We set it to 1 so the
+      // header repeats.
+      headerRows?: number;
+      body: Array<Array<{ text?: string | Content[]; style?: string; fillColor?: string; border?: [boolean, boolean, boolean, boolean]; stack?: Content[]; margin?: [number, number, number, number] | number; alignment?: Alignment }>>;
     };
     layout?: {
-      hLineWidth?: () => number;
-      vLineWidth?: () => number;
-      hLineColor?: () => string;
-      vLineColor?: () => string;
+      hLineWidth?: (() => number) | number;
+      vLineWidth?: (() => number) | number;
+      hLineColor?: (() => string) | string;
+      vLineColor?: (() => string) | string;
       hPaddingBefore?: number;
       hPaddingAfter?: number;
       vPaddingBefore?: number;
       vPaddingAfter?: number;
+      // pdfmake/pdfkit also support per-cell function-form paddings.
+      // We use these for the table layout.
+      paddingTop?: (() => number) | number;
+      paddingBottom?: (() => number) | number;
+      paddingLeft?: (() => number) | number;
+      paddingRight?: (() => number) | number;
     };
     margin?: [number, number, number, number] | number;
   }

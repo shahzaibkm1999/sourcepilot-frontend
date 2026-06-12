@@ -29,10 +29,12 @@ interface DocumentViewerProps {
  * DocumentViewer
  * --------------
  * Renders a single document's `content_markdown` inline. Provides
- * a sticky action bar with Copy, Download .md, Export PDF, Edit,
- * Delete, Regenerate, Close. In edit mode the body swaps from
- * rendered HTML to a raw `<textarea>` and the bar shows Save /
- * Cancel instead.
+ * a sticky action bar with Copy, Export PDF, Edit, Delete,
+ * Regenerate, Close. In edit mode the body swaps from rendered
+ * HTML to a raw `<textarea>` and the bar shows Save / Cancel
+ * instead. The document's only download format is a finished PDF
+ * — there is no .md download, by design (Constitution Article IV:
+ * "Honest UI", clients don't see the developer-facing source).
  *
  * Honest UI (Constitution Article IV): the backend persists before
  * returning, so every document in this viewer is durable server
@@ -78,25 +80,6 @@ export default function DocumentViewer({
           : 'Copy failed: clipboard unavailable',
       );
     }
-  };
-
-  const handleDownload = () => {
-    const slug = slugify(project.name);
-    const stamp = new Date(doc.created_at).toISOString().slice(0, 10);
-    const filename = `${slug}-${doc.doc_type}-${stamp}.md`;
-    const blob = new Blob([doc.content_markdown], {
-      type: 'text/markdown;charset=utf-8',
-    });
-    const url = URL.createObjectURL(blob);
-    // `window.document` — the prop is named `doc`, not `document`, so
-    // the global DOM `Document` is reachable without a shadow.
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handleRegenerate = () => {
@@ -245,14 +228,6 @@ export default function DocumentViewer({
                 title="Copy the raw markdown to the clipboard"
               >
                 {copied ? '✓ Copied' : 'Copy'}
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={handleDownload}
-                title="Download as a .md file"
-              >
-                ↓ .md
               </button>
               <button
                 type="button"

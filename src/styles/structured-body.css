@@ -229,11 +229,85 @@
     margin: var(--space-3) 0 0;
 }
 
+/* ---- Tables ---- */
+.chapter-table-wrap {
+    /* Wrap the table in a horizontally-scrolling container so wide
+       tables (e.g. 4-column risk matrices) don't blow out the
+       article width on narrow screens. */
+    width: 100%;
+    overflow-x: auto;
+    margin: var(--space-2) 0 var(--space-4);
+}
+
+.chapter-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--color-ink);
+    background: transparent;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.chapter-table thead th {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    text-align: left;
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-ink);
+    vertical-align: bottom;
+    background: transparent;
+}
+
+.chapter-table tbody td {
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-rule);
+    vertical-align: top;
+}
+
+.chapter-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.chapter-table th code,
+.chapter-table td code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+.chapter-table th strong,
+.chapter-table td strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.chapter-table th em,
+.chapter-table td em {
+    font-style: italic;
+    color: var(--color-ink);
+}
+
+/* On the narrowest screens, shrink the table type slightly so a
+   3-column table still fits. */
 @media (max-width: 900px) {
     .chapter-title {
         font-size: 24px;
     }
     .chapter-callout {
         padding: var(--space-4) var(--space-5);
+    }
+    .chapter-table {
+        font-size: 13.5px;
     }
 }

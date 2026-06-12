@@ -148,5 +148,52 @@ function BlockView({
           dangerouslySetInnerHTML={{ __html: renderMarkdownInline(block.text) }}
         />
       );
+    case 'table':
+      return <TableView block={block} />;
   }
+}
+
+/**
+ * TableView
+ * ---------
+ * Renders a markdown table as a real <table>. The structured parser
+ * has already split the source into a header row + N data rows +
+ * optional per-column alignment, so this is pure layout.
+ *
+ * Editorial treatment: narrow borders, paper-tinted header row,
+ * accent rule under the header, mono small-caps header text (matches
+ * the chapter-meta eyebrow styling). Body cells use the same display
+ * font as paragraphs.
+ */
+function TableView({ block }: { block: Extract<DocBlock, { kind: 'table' }> }) {
+  return (
+    <div className="chapter-table-wrap">
+      <table className="chapter-table">
+        <thead>
+          <tr>
+            {block.header.map((cell, ci) => (
+              <th
+                key={ci}
+                style={block.align ? { textAlign: block.align[ci] } : undefined}
+                dangerouslySetInnerHTML={{ __html: renderMarkdownInline(cell) }}
+              />
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {block.rows.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((cell, ci) => (
+                <td
+                  key={ci}
+                  style={block.align ? { textAlign: block.align[ci] } : undefined}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdownInline(cell) }}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

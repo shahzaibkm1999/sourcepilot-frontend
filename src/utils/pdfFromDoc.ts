@@ -244,6 +244,19 @@ function pdfStyles() {
       lineHeight: 1.5,
       color: COLOR.ink,
     },
+    tableHeader: {
+      font: FONT.mono,
+      fontSize: 8,
+      bold: true,
+      characterSpacing: 0.5,
+      color: COLOR.inkMuted,
+    },
+    tableCell: {
+      font: FONT.body,
+      fontSize: 9.5,
+      lineHeight: 1.4,
+      color: COLOR.ink,
+    },
     calloutMark: {
       font: FONT.display,
       fontSize: 26,
@@ -567,7 +580,56 @@ function blockToContent(block: DocBlock, opts: { isLeadParagraph: boolean }): Co
           margin: [0, 14, 0, 6],
         },
       ];
+    case 'table':
+      return [tableBlock(block)];
   }
+}
+
+/**
+ * Render a markdown table as a pdfmake `table` content node.
+ *
+ * Editorial treatment: hairline borders, paper-tinted header row,
+ * bold dark header text, body cells in the same body font as the
+ * rest of the document. Column widths are auto-distributed by
+ * pdfmake. Per-column alignment from the markdown source (`:---`
+ * / `---:` / `:---:` markers) is honoured.
+ */
+function tableBlock(block: Extract<DocBlock, { kind: 'table' }>): Content {
+  const align = block.align;
+  const cellAlign = (col: number): 'left' | 'center' | 'right' =>
+    align?.[col] ?? 'left';
+
+  const headerRow = block.header.map((cell, ci) => ({
+    text: asPdfText(renderInlineText(cell)),
+    style: 'tableHeader',
+    alignment: cellAlign(ci),
+  }));
+
+  const bodyRows = block.rows.map((row) =>
+    row.map((cell, ci) => ({
+      text: asPdfText(renderInlineText(cell)),
+      style: 'tableCell',
+      alignment: cellAlign(ci),
+    })),
+  );
+
+  return {
+    table: {
+      headerRows: 1,
+      widths: Array.from({ length: block.header.length }, () => 'auto'),
+      body: [headerRow, ...bodyRows],
+    },
+    layout: {
+      hLineWidth: () => 0.5,
+      vLineWidth: () => 0,
+      hLineColor: () => '#a8602a',
+      paddingTop: () => 6,
+      paddingBottom: () => 6,
+      paddingLeft: () => 0,
+      paddingRight: () => 8,
+    },
+    margin: [0, 4, 0, 14],
+  };
 }
 
 /**
