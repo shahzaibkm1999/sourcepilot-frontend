@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProjectDocument, Project, DocType } from '../../types';
 import { docTypeLabel, slugify } from '../../utils/audience';
-import { exportElementAsPdf } from '../../utils/pdfExport';
+import { exportStructuredDocAsPdf } from '../../utils/pdfExport';
 import StatusChip from '../ui/StatusChip';
 import CoverPage from './CoverPage';
 import RunningHeader from './RunningHeader';
@@ -54,7 +54,6 @@ export default function DocumentViewer({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState(doc.content_markdown);
-  const articleRef = useRef<HTMLElement>(null);
 
   // Keep the edit draft in sync with the parent's `doc` whenever it
   // changes (e.g. after a save, or when the user navigates to a
@@ -105,13 +104,18 @@ export default function DocumentViewer({
   };
 
   const handleExportPdf = async () => {
-    if (!articleRef.current || exporting) return;
+    if (exporting) return;
     const slug = slugify(project.name);
     const stamp = new Date(doc.created_at).toISOString().slice(0, 10);
-    const filename = `${slug}-${doc.doc_type}-${stamp}.pdf`;
+    const filename = `${slug}-${doc.doc_type}-${stamp}`;
     setExporting(true);
     try {
-      await exportElementAsPdf(articleRef.current, filename);
+      await exportStructuredDocAsPdf({
+        markdown: doc.content_markdown,
+        project,
+        doc,
+        filename,
+      });
     } catch (err) {
       // Mirror handleCopy: surface failures instead of swallowing.
       window.alert(
@@ -167,7 +171,6 @@ export default function DocumentViewer({
 
   return (
     <article
-      ref={articleRef}
       className="document-article"
       aria-label="Document viewer"
     >

@@ -5,15 +5,19 @@
    =========================================== */
 
 .document-article {
-    background: var(--color-surface);
+    /* A4 paper feel: cream surface, editorial margins, subtle drop
+       shadow. The width approximates A4 (210mm) with the same
+       inside margins the PDF uses (64pt) so the on-screen reading
+       experience is visually a smaller twin of the printed page. */
+    background: var(--color-paper);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-9) var(--space-10);
-    box-shadow: var(--shadow-md);
-    max-width: 800px;
+    box-shadow: var(--shadow-lg);
+    max-width: 820px;
     margin: 0 auto;
     position: relative;
-    /* Faint paper texture */
+    /* Faint paper grain */
     background-image:
         radial-gradient(
             circle at 20% 20%,
@@ -21,6 +25,10 @@
             transparent 0.5px
         );
     background-size: 4px 4px;
+    /* Honor print semantics — the on-screen article is one long
+       scroll, but the page break that the PDF inserts between
+       cover / TOC / first chapter / sign-off should not collapse. */
+    break-inside: avoid;
 }
 
 .document-article-header {
