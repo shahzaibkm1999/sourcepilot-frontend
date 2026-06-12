@@ -162,7 +162,7 @@ export default function ProjectForm({
       <div className="project-form-actions">
         <button
           type="button"
-          className="ghost-button"
+          className="secondary-button"
           onClick={onCancel}
           disabled={submitting}
         >

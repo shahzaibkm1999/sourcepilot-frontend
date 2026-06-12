@@ -1,52 +1,17 @@
 /* ===========================================
-   CreateProjectPage + ProjectForm
+   CreateProjectPage + ProjectForm.
+   PageHeader owns the title block; this file
+   owns the form surface and the audience picker.
    =========================================== */
 
 .create-project-page {
     min-height: 100vh;
-    padding: var(--space-7) var(--space-10);
-    max-width: 920px;
+    padding: var(--space-7) var(--space-10) var(--space-10);
+}
+
+.create-project-page-inner {
+    max-width: var(--max-width);
     margin: 0 auto;
-}
-
-.create-project-page-header {
-    margin-bottom: var(--space-7);
-    position: relative;
-    padding-bottom: var(--space-5);
-}
-
-.create-project-page-header::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        var(--color-border-strong) 12%,
-        var(--color-border-strong) 88%,
-        transparent
-    );
-}
-
-.create-project-page-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--color-ink-subtle);
-    margin-bottom: var(--space-3);
-}
-
-.create-project-page h1 {
-    font-size: 36px;
-    font-weight: 500;
-    font-style: italic;
-    letter-spacing: -0.02em;
-    margin-bottom: var(--space-3);
-    line-height: 1.1;
 }
 
 .create-project-error {
@@ -57,6 +22,7 @@
     padding: var(--space-4) var(--space-5);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-5);
+    font-size: 0.92rem;
 }
 
 .create-project-form-section {
@@ -65,6 +31,24 @@
     border-radius: var(--radius-lg);
     padding: var(--space-7) var(--space-8);
     box-shadow: var(--shadow-sm);
+    position: relative;
+}
+
+.create-project-form-section::before {
+    /* Top hairline detail — gives the surface a "tipped-in" feel. */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--space-8);
+    right: var(--space-8);
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-accent) 50%,
+        transparent
+    );
+    opacity: 0.4;
 }
 
 /* ---- Form ---- */
@@ -119,7 +103,10 @@
     padding: 10px 12px;
     width: 100%;
     box-sizing: border-box;
-    transition: border-color 180ms ease, box-shadow 180ms ease;
+    transition:
+        border-color var(--duration-base) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out),
+        background-color var(--duration-base) var(--ease-out);
 }
 
 .project-textarea {
@@ -130,18 +117,31 @@
     min-height: 140px;
 }
 
+.project-input::placeholder,
+.project-textarea::placeholder {
+    color: var(--color-ink-subtle);
+    font-style: italic;
+}
+
+.project-input:hover:not(:focus),
+.project-textarea:hover:not(:focus) {
+    border-color: var(--color-border-strong);
+}
+
 .project-input:focus,
 .project-textarea:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-soft);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-soft) 60%, transparent);
+    background-color: var(--color-surface);
 }
 
 .project-hint {
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     color: var(--color-ink-subtle);
     font-family: var(--font-mono);
     align-self: flex-end;
+    letter-spacing: 0.02em;
 }
 
 /* ---- Audience radios ---- */
@@ -161,12 +161,18 @@
     border-radius: var(--radius-md);
     background: var(--color-surface);
     cursor: pointer;
-    transition: border-color 180ms ease, background-color 180ms ease;
+    position: relative;
+    transition:
+        border-color var(--duration-base) var(--ease-out),
+        background-color var(--duration-base) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out);
 }
 
 .audience-radio:hover {
     border-color: var(--color-border-strong);
     background: var(--color-surface-tint);
+    transform: translateY(-1px);
 }
 
 .audience-radio input[type='radio'] {
@@ -181,6 +187,11 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
+.audience-radio:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
 .audience-radio-body {
     display: flex;
     flex-direction: column;
@@ -193,11 +204,12 @@
     font-size: 1rem;
     font-weight: 500;
     color: var(--color-ink);
+    letter-spacing: -0.005em;
 }
 
 .audience-radio-desc {
     font-size: 0.82rem;
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
 /* ---- Form actions ---- */
@@ -211,7 +223,7 @@
 }
 
 .back-button {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
 }
 
 @media (max-width: 900px) {
@@ -221,11 +233,12 @@
     .create-project-form-section {
         padding: var(--space-5);
     }
+    .create-project-form-section::before {
+        left: var(--space-5);
+        right: var(--space-5);
+    }
     .project-form-grid,
     .audience-radios {
         grid-template-columns: 1fr;
-    }
-    .create-project-page h1 {
-        font-size: 28px;
     }
 }

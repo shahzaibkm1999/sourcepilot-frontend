@@ -65,6 +65,13 @@
     display: flex;
     gap: var(--space-2);
     flex-wrap: wrap;
+    padding-top: var(--space-3);
+    margin-top: var(--space-3);
+    border-top: 1px dashed var(--color-rule);
+}
+
+.document-article-actions .primary-button {
+    margin-left: auto;
 }
 
 /* ---- Markdown body — editorial typography (reused from .spec-body) ---- */
@@ -132,6 +139,27 @@
 .document-article-body p {
     margin-bottom: var(--space-5);
     hyphens: auto;
+}
+
+/* Drop cap on the first paragraph of a generated article. The first
+   <p> after the first <h1>/<h2> is a "lead" paragraph; this gives the
+   viewer the magazine-article feel that pairs with the editorial body
+   typography. */
+.document-article-body > p:first-of-type {
+    font-size: 1.075em;
+    line-height: 1.7;
+    color: var(--color-ink);
+}
+
+.document-article-body > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.6em;
+    line-height: 0.9;
+    float: left;
+    margin: 0.05em 0.12em 0 0;
+    color: var(--color-accent);
+    font-weight: 500;
+    font-style: italic;
 }
 
 .document-article-body ul,

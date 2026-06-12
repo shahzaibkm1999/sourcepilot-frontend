@@ -1,0 +1,53 @@
+/* ===========================================
+   Staggered mount reveal — CSS-only.
+   Apply `.reveal` to a container; children with
+   `data-stagger="N"` (or `.reveal-item` with `--i` set inline)
+   fade up sequentially. One well-orchestrated moment > lots of
+   scattered micro-interactions.
+   =========================================== */
+
+@keyframes reveal-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal-item {
+    --i: 0;
+    opacity: 0;
+    animation: reveal-fade-up 480ms var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 80ms);
+}
+
+.reveal-on-mount > * {
+    --i: 0;
+    opacity: 0;
+    animation: reveal-fade-up 480ms var(--ease-out) forwards;
+}
+
+.reveal-on-mount > *:nth-child(1)  { animation-delay:  60ms; }
+.reveal-on-mount > *:nth-child(2)  { animation-delay: 120ms; }
+.reveal-on-mount > *:nth-child(3)  { animation-delay: 180ms; }
+.reveal-on-mount > *:nth-child(4)  { animation-delay: 240ms; }
+.reveal-on-mount > *:nth-child(5)  { animation-delay: 300ms; }
+.reveal-on-mount > *:nth-child(6)  { animation-delay: 360ms; }
+.reveal-on-mount > *:nth-child(7)  { animation-delay: 420ms; }
+.reveal-on-mount > *:nth-child(8)  { animation-delay: 480ms; }
+.reveal-on-mount > *:nth-child(9)  { animation-delay: 540ms; }
+.reveal-on-mount > *:nth-child(10) { animation-delay: 600ms; }
+.reveal-on-mount > *:nth-child(11) { animation-delay: 660ms; }
+.reveal-on-mount > *:nth-child(12) { animation-delay: 720ms; }
+.reveal-on-mount > *:nth-child(n+13) { animation-delay: 780ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-on-mount > *,
+    .reveal-item {
+        animation: none;
+        opacity: 1;
+    }
+}

@@ -187,21 +187,21 @@ export default function DocumentViewer({
             <>
               <button
                 type="button"
-                className="ghost-button primary"
-                onClick={handleSaveEdit}
-                disabled={saving}
-                title="Save the edited body"
-              >
-                {saving ? 'Saving…' : 'Save'}
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
+                className="secondary-button"
                 onClick={handleCancelEdit}
                 disabled={saving}
                 title="Discard changes and exit edit mode"
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleSaveEdit}
+                disabled={saving}
+                title="Save the edited body"
+              >
+                {saving ? 'Saving…' : 'Save'}
               </button>
             </>
           ) : (
@@ -253,7 +253,15 @@ export default function DocumentViewer({
               )}
               <button
                 type="button"
-                className="ghost-button primary"
+                className="ghost-button"
+                onClick={onClose}
+                title="Close the viewer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className="primary-button"
                 onClick={handleRegenerate}
                 disabled={regenerating || doc.status === 'pending' || doc.status === 'failed'}
                 title={
@@ -271,14 +279,6 @@ export default function DocumentViewer({
                     : doc.status === 'failed'
                       ? 'Retry'
                       : 'Regenerate'}
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={onClose}
-                title="Close the viewer"
-              >
-                Close
               </button>
             </>
           )}

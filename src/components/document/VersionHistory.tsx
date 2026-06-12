@@ -1,6 +1,7 @@
 import { ProjectDocument } from '../../types';
 import { formatRelative } from '../../utils/date';
 import { groupByDocType, versionNumber } from '../../utils/documents';
+import EmptyState from '../ui/EmptyState';
 import '../../styles/version-history.css';
 
 interface VersionHistoryProps {
@@ -31,13 +32,11 @@ export default function VersionHistory({
 }: VersionHistoryProps) {
   if (documents.length === 0) {
     return (
-      <div className="version-history-empty">
-        <p className="muted">
-          No documents yet. Use the buttons above to generate a
-          <strong> Non-Technical Proposal</strong> or a
-          <strong> Technical Proposal</strong>.
-        </p>
-      </div>
+      <EmptyState
+        eyebrow="no documents"
+        title="Nothing generated yet."
+        description='Use the buttons in § I to generate a Non-Technical Proposal or a Technical Proposal. Each generation creates a new version you can compare, edit, or delete.'
+      />
     );
   }
 
@@ -74,62 +73,52 @@ export default function VersionHistory({
 
                 return (
                   <li key={doc.id} className={className}>
-                    <div className="version-history-item-main">
-                      <div className="version-history-item-meta">
-                        <span className="version-history-item-version">
-                          v{version}
-                        </span>
-                        {isCurrent && (
-                          <span className="version-history-item-current-badge">
-                            current
+                    <button
+                      type="button"
+                      className="version-history-item-button"
+                      onClick={() => onSelect(doc.id)}
+                      disabled={doc.status === 'pending'}
+                      aria-pressed={isSelected}
+                    >
+                      <div className="version-history-item-main">
+                        <div className="version-history-item-meta">
+                          <span className="version-history-item-version">
+                            v{version}
                           </span>
-                        )}
-                        {doc.status === 'pending' && (
-                          <span className="version-history-item-status-badge version-history-item-status-badge--pending">
-                            <span className="version-history-item-spinner" aria-hidden="true" />
-                            generating…
-                          </span>
-                        )}
-                        {doc.status === 'failed' && (
-                          <span className="version-history-item-status-badge version-history-item-status-badge--failed">
-                            failed
-                          </span>
-                        )}
-                        <span className="version-history-item-sep muted">·</span>
-                        <time
-                          className="version-history-item-time muted"
-                          dateTime={doc.created_at}
-                        >
-                          {doc.status === 'pending'
-                            ? `queued ${formatRelative(doc.created_at)}`
-                            : doc.status === 'failed'
-                              ? `failed ${formatRelative(doc.created_at)}`
-                              : `generated ${formatRelative(doc.created_at)}`}
-                        </time>
+                          {isCurrent && (
+                            <span className="version-history-item-current-badge">
+                              current
+                            </span>
+                          )}
+                          {doc.status === 'pending' && (
+                            <span className="version-history-item-status-badge version-history-item-status-badge--pending">
+                              <span className="version-history-item-spinner" aria-hidden="true" />
+                              generating…
+                            </span>
+                          )}
+                          {doc.status === 'failed' && (
+                            <span className="version-history-item-status-badge version-history-item-status-badge--failed">
+                              failed
+                            </span>
+                          )}
+                          <span className="version-history-item-sep muted">·</span>
+                          <time
+                            className="version-history-item-time muted"
+                            dateTime={doc.created_at}
+                          >
+                            {doc.status === 'pending'
+                              ? `queued ${formatRelative(doc.created_at)}`
+                              : doc.status === 'failed'
+                                ? `failed ${formatRelative(doc.created_at)}`
+                                : `generated ${formatRelative(doc.created_at)}`}
+                          </time>
+                        </div>
                       </div>
-                    </div>
-                    <div className="version-history-item-actions">
-                      <button
-                        type="button"
-                        className="ghost-button"
-                        onClick={() => onSelect(doc.id)}
-                        aria-pressed={isSelected}
-                        disabled={doc.status === 'pending'}
-                        title={
-                          doc.status === 'pending'
-                            ? 'Still generating…'
-                            : doc.status === 'failed'
-                              ? 'View the failure message'
-                              : 'View this document version'
-                        }
-                      >
-                        {doc.status === 'pending'
-                          ? 'View'
-                          : isSelected
-                            ? 'Hide'
-                            : 'View'}
-                      </button>
-                    </div>
+                      <span className="version-history-item-cta" aria-hidden="true">
+                        {isSelected ? 'Hide' : 'View'}
+                        <span className="version-history-item-arrow">→</span>
+                      </span>
+                    </button>
                   </li>
                 );
               })}

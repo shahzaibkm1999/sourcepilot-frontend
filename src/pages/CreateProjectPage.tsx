@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import ProjectForm, { ProjectFormValues } from '../components/project/ProjectForm';
+import PageHeader from '../components/ui/PageHeader';
 import { api } from '../services/api';
 import { Project } from '../types';
-import '../styles/create-project.css';
+import '../styles/reveal.css';
 
 interface CreateProjectPageProps {
   onCreated: (project: Project) => void;
@@ -44,8 +45,8 @@ export default function CreateProjectPage({ onCreated, onCancel }: CreateProject
   };
 
   return (
-    <div className="create-project-page">
-      <header className="create-project-page-header">
+    <div className="create-project-page reveal-on-mount">
+      <div className="create-project-page-inner">
         <button
           type="button"
           className="ghost-button back-button"
@@ -53,28 +54,27 @@ export default function CreateProjectPage({ onCreated, onCancel }: CreateProject
         >
           <span aria-hidden="true">←</span> Back to projects
         </button>
-        <div className="create-project-page-eyebrow">SourcePilot</div>
-        <h1>Capture a new project</h1>
-        <p className="subtitle">
-          One intake. The audience choice on this form decides
-          whether you'll later generate an Airtable-style proposal
-          or an Orbit-style technical scope.
-        </p>
-      </header>
 
-      {error && (
-        <div className="create-project-error">
-          <strong>Could not create the project.</strong> {error}
-        </div>
-      )}
-
-      <section className="create-project-form-section">
-        <ProjectForm
-          onSubmit={handleSubmit}
-          onCancel={onCancel}
-          submitting={submitting}
+        <PageHeader
+          eyebrow="SourcePilot · New"
+          title="Capture a new project"
+          subtitle="One intake. The audience choice on this form decides whether you'll later generate an Airtable-style proposal or an Orbit-style technical scope."
         />
-      </section>
+
+        {error && (
+          <div className="create-project-error">
+            <strong>Could not create the project.</strong> {error}
+          </div>
+        )}
+
+        <section className="create-project-form-section">
+          <ProjectForm
+            onSubmit={handleSubmit}
+            onCancel={onCancel}
+            submitting={submitting}
+          />
+        </section>
+      </div>
     </div>
   );
 }

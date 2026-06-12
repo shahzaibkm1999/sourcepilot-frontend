@@ -1,0 +1,47 @@
+/* ===========================================
+   SectionLabel — "§ II — Documents" pattern.
+   Uppercase mono, with optional roman numeral and meta.
+   =========================================== */
+
+.section-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+}
+
+.section-label-main {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-3);
+}
+
+.section-label-numeral {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--color-accent);
+    letter-spacing: 0;
+    font-weight: 500;
+}
+
+.section-label-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-muted);
+    font-weight: 500;
+}
+
+.section-label-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-subtle);
+    white-space: nowrap;
+}

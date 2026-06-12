@@ -1,0 +1,54 @@
+/* ===========================================
+   EmptyState — editorial pull-quote.
+   Used wherever the data is "no items yet".
+   =========================================== */
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-9) var(--space-6);
+    background-color: var(--color-surface);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    position: relative;
+}
+
+.empty-state-rule {
+    width: 48px;
+    height: 2px;
+    background-color: var(--color-accent);
+    margin: 0 auto var(--space-4);
+}
+
+.empty-state-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.012em;
+    margin-bottom: var(--space-3);
+    color: var(--color-ink);
+}
+
+.empty-state-description {
+    max-width: 52ch;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: var(--color-ink-muted);
+    font-size: 0.95rem;
+}
+
+.empty-state-action {
+    margin-top: var(--space-5);
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+}

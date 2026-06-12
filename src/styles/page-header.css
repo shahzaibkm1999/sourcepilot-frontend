@@ -1,0 +1,95 @@
+/* ===========================================
+   PageHeader — editorial page top.
+   Eyebrow / italic serif title / subtitle,
+   fading rule at the bottom, optional right-side actions.
+   =========================================== */
+
+.page-header {
+    padding: var(--space-9) 0 var(--space-7);
+    position: relative;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-border-strong) 12%,
+        var(--color-border-strong) 88%,
+        transparent
+    );
+}
+
+.page-header-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-10);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-7);
+    flex-wrap: wrap;
+}
+
+.page-header-text {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.page-header-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+    margin-bottom: var(--space-3);
+}
+
+.page-header-title {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.022em;
+    line-height: 1.04;
+    margin-bottom: var(--space-3);
+    color: var(--color-ink);
+}
+
+.page-header-subtitle {
+    max-width: 60ch;
+    color: var(--color-ink-muted);
+    line-height: 1.55;
+    font-size: 0.98rem;
+}
+
+.page-header-extra {
+    margin-top: var(--space-4);
+}
+
+.page-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding-bottom: 4px; /* visually align with subtitle baseline */
+}
+
+@media (max-width: 900px) {
+    .page-header-inner {
+        padding: 0 var(--space-6);
+    }
+    .page-header {
+        padding-top: var(--space-7);
+    }
+    .page-header-title {
+        font-size: 34px;
+    }
+    .page-header-actions {
+        padding-bottom: 0;
+    }
+}

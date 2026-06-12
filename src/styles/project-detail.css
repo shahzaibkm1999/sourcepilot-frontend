@@ -1,23 +1,57 @@
 /* ===========================================
    ProjectDetailPage
+   Section labels (I, II) live in section-label.css.
+   This file owns the page container, the header
+   block, the Generate grid, the requirement callout,
+   and the error band.
    =========================================== */
 
 .project-detail-page {
     min-height: 100vh;
-    padding: var(--space-7) var(--space-10);
-    max-width: 1100px;
+    padding: var(--space-7) var(--space-10) var(--space-10);
+}
+
+.project-detail-page-inner {
+    max-width: var(--max-width-wide);
     margin: 0 auto;
 }
 
-.project-detail-page--loading,
-.project-detail-page .muted {
-    margin-top: var(--space-5);
+.project-detail-page--loading {
+    max-width: var(--max-width);
+    margin: 0 auto;
 }
 
 .project-detail-header {
     margin-bottom: var(--space-7);
     padding-bottom: var(--space-6);
     border-bottom: 1px solid var(--color-rule);
+    position: relative;
+}
+
+.project-detail-header::after {
+    /* Fading rule reinforcement, like the page header */
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-accent) 50%,
+        transparent
+    );
+    opacity: 0.25;
+}
+
+.project-detail-eyebrow-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+    flex-wrap: wrap;
+    gap: var(--space-3);
 }
 
 .project-detail-eyebrow {
@@ -26,25 +60,32 @@
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: var(--color-ink-subtle);
-    margin-bottom: var(--space-2);
+}
+
+.project-detail-eyebrow-actions {
+    display: flex;
+    gap: var(--space-2);
 }
 
 .project-detail-title {
     font-family: var(--font-display);
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 500;
     font-style: italic;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    letter-spacing: -0.022em;
+    line-height: 1.05;
     margin-bottom: var(--space-2);
+    color: var(--color-ink);
+    text-wrap: balance;
 }
 
 .project-detail-client {
     font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-style: italic;
     color: var(--color-ink-muted);
     margin-bottom: var(--space-3);
+    letter-spacing: -0.005em;
 }
 
 .project-detail-chips {
@@ -75,10 +116,11 @@
     font-family: var(--font-mono);
     font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     cursor: pointer;
     list-style: none;
     margin-bottom: var(--space-3);
+    color: var(--color-ink-muted);
 }
 
 .project-detail-requirement summary::-webkit-details-marker {
@@ -89,6 +131,8 @@
     content: '+ ';
     color: var(--color-accent);
     font-weight: 600;
+    display: inline-block;
+    transform: translateY(-1px);
 }
 
 .project-detail-requirement[open] summary::before {
@@ -98,19 +142,10 @@
 .project-detail-requirement p {
     font-family: var(--font-display);
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-ink);
     white-space: pre-wrap;
-}
-
-.project-detail-section-title {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: var(--color-ink-muted);
-    margin-bottom: var(--space-4);
-    font-weight: 500;
+    text-wrap: pretty;
 }
 
 .project-detail-generate {
@@ -128,8 +163,9 @@
 .generate-hint {
     margin-top: var(--space-4);
     font-size: 0.85rem;
-    line-height: 1.5;
-    max-width: 60ch;
+    line-height: 1.55;
+    max-width: 64ch;
+    color: var(--color-ink-muted);
 }
 
 .project-detail-error {
@@ -140,6 +176,7 @@
     padding: var(--space-4) var(--space-5);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-5);
+    font-size: 0.92rem;
 }
 
 .project-detail-documents {
@@ -150,6 +187,13 @@
     margin-top: var(--space-5);
 }
 
+.project-detail-viewer-loading {
+    padding: var(--space-7) 0;
+    text-align: center;
+    font-style: italic;
+    font-family: var(--font-display);
+}
+
 @media (max-width: 900px) {
     .project-detail-page {
         padding: var(--space-6);
@@ -158,6 +202,6 @@
         grid-template-columns: 1fr;
     }
     .project-detail-title {
-        font-size: 28px;
+        font-size: 30px;
     }
 }

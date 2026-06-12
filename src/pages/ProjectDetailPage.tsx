@@ -5,12 +5,14 @@ import { audienceLabel } from '../utils/audience';
 import { formatRelative } from '../utils/date';
 import { groupByDocType, versionNumber } from '../utils/documents';
 import StatusChip from '../components/ui/StatusChip';
+import SectionLabel from '../components/ui/SectionLabel';
 import ProjectForm, { ProjectFormValues } from '../components/project/ProjectForm';
 import VersionHistory from '../components/document/VersionHistory';
 // Lazy-load the viewer: it pulls in jspdf + html2canvas (~230 KB
 // gzipped) which we don't need to ship on the projects list.
 const DocumentViewer = lazy(() => import('../components/document/DocumentViewer'));
 import '../styles/project-detail.css';
+import '../styles/reveal.css';
 
 interface ProjectDetailPageProps {
   projectId: string;
@@ -332,155 +334,164 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
     ? project.documents.find((d) => d.id === selectedId) ?? null
     : null;
 
+  const sectionMeta = (() => {
+    if (project.documents.length === 0) return 'no documents yet';
+    return `${project.documents.length} version${
+      project.documents.length === 1 ? '' : 's'
+    }`;
+  })();
+
   return (
-    <div className="project-detail-page">
-      <button type="button" className="ghost-button back-button" onClick={onBack}>
-        <span aria-hidden="true">←</span> Back to projects
-      </button>
+    <div className="project-detail-page reveal-on-mount">
+      <div className="project-detail-page-inner">
+        <button type="button" className="ghost-button back-button" onClick={onBack}>
+          <span aria-hidden="true">←</span> Back to projects
+        </button>
 
-      <header className="project-detail-header">
-        <div className="project-detail-eyebrow-row">
-          <div className="project-detail-eyebrow">Project</div>
-          {!editing && (
-            <div className="project-detail-eyebrow-actions">
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={() => setEditing(true)}
-                disabled={deletingProject}
-              >
-                Edit project
-              </button>
-              <button
-                type="button"
-                className="ghost-button danger"
-                onClick={handleDeleteProject}
-                disabled={deletingProject}
-              >
-                {deletingProject ? 'Deleting…' : 'Delete project'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {editing ? (
-          <ProjectForm
-            initialValues={{
-              name: project.name,
-              client_name: project.client_name ?? '',
-              audience: project.audience,
-              project_type: project.project_type ?? '',
-              raw_requirement: project.raw_requirement,
-            }}
-            submitLabel="Save Changes"
-            submitting={savingProject}
-            onSubmit={handleUpdateProject}
-            onCancel={() => {
-              setEditing(false);
-              setError(null);
-            }}
-          />
-        ) : (
-          <>
-            <h1 className="project-detail-title">{project.name}</h1>
-            {project.client_name && (
-              <div className="project-detail-client muted">for {project.client_name}</div>
+        <header className="project-detail-header">
+          <div className="project-detail-eyebrow-row">
+            <div className="project-detail-eyebrow">Project</div>
+            {!editing && (
+              <div className="project-detail-eyebrow-actions">
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => setEditing(true)}
+                  disabled={deletingProject}
+                >
+                  Edit project
+                </button>
+                <button
+                  type="button"
+                  className="ghost-button danger"
+                  onClick={handleDeleteProject}
+                  disabled={deletingProject}
+                >
+                  {deletingProject ? 'Deleting…' : 'Delete project'}
+                </button>
+              </div>
             )}
+          </div>
 
-            <div className="project-detail-chips">
-              <StatusChip tone="audience" label={audienceLabel(project.audience)} />
-              {project.project_type && (
-                <StatusChip tone="type" label={project.project_type} />
-              )}
-              <span className="muted project-detail-time">
-                created {formatRelative(project.created_at)}
-              </span>
-            </div>
-
-            {project.raw_requirement && (
-              <details className="project-detail-requirement" open>
-                <summary className="muted">Raw requirement</summary>
-                <p>{project.raw_requirement}</p>
-              </details>
-            )}
-          </>
-        )}
-      </header>
-
-      {error && (
-        <div className="project-detail-error">
-          <strong>Something went wrong.</strong> {error}
-        </div>
-      )}
-
-      <section className="project-detail-generate" aria-label="Generate a document">
-        <h2 className="project-detail-section-title">Generate</h2>
-        <div className="generate-row">
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => generate('proposal')}
-            disabled={busyType !== null}
-          >
-            {busyType === 'proposal'
-              ? 'Generating…'
-              : hasProposal
-                ? `Regenerate Non-Technical Proposal · v${proposalCount}`
-                : 'Generate Non-Technical Proposal'}
-          </button>
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => generate('tech_scope')}
-            disabled={busyType !== null}
-          >
-            {busyType === 'tech_scope'
-              ? 'Generating…'
-              : hasTechScope
-                ? `Regenerate Technical Proposal · v${techScopeCount}`
-                : 'Generate Technical Proposal'}
-          </button>
-        </div>
-        <p className="muted generate-hint">
-          Same intake, two proposal variants — one for a non-technical
-          client, one for a technical client.{' '}
-          {project.audience === 'non_tecnico'
-            ? 'This project is set to a non-technical client — the non-technical proposal is the natural pick.'
-            : 'This project is set to a technical client — the technical proposal is the natural pick.'}
-        </p>
-      </section>
-
-      <section className="project-detail-documents" aria-label="Generated documents">
-        <h2 className="project-detail-section-title">Documents</h2>
-        <VersionHistory
-          documents={project.documents}
-          selectedId={selectedId}
-          justCreatedId={justCreatedId}
-          onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
-        />
-      </section>
-
-      {selectedDoc && (
-        <section className="project-detail-viewer" aria-label="Document viewer">
-          <Suspense
-            fallback={
-              <p className="muted project-detail-viewer-loading">
-                Loading viewer…
-              </p>
-            }
-          >
-            <DocumentViewer
-              doc={selectedDoc}
-              project={project}
-              regenerating={busyType === selectedDoc.doc_type}
-              onRegenerate={(dt) => generate(dt)}
-              onUpdateContent={(md) => handleUpdateDocumentContent(selectedDoc.id, md)}
-              onDelete={handleDeleteDocument(selectedDoc.id)}
-              onClose={() => setSelectedId(null)}
+          {editing ? (
+            <ProjectForm
+              initialValues={{
+                name: project.name,
+                client_name: project.client_name ?? '',
+                audience: project.audience,
+                project_type: project.project_type ?? '',
+                raw_requirement: project.raw_requirement,
+              }}
+              submitLabel="Save Changes"
+              submitting={savingProject}
+              onSubmit={handleUpdateProject}
+              onCancel={() => {
+                setEditing(false);
+                setError(null);
+              }}
             />
-          </Suspense>
+          ) : (
+            <>
+              <h1 className="project-detail-title">{project.name}</h1>
+              {project.client_name && (
+                <div className="project-detail-client muted">for {project.client_name}</div>
+              )}
+
+              <div className="project-detail-chips">
+                <StatusChip tone="audience" label={audienceLabel(project.audience)} />
+                {project.project_type && (
+                  <StatusChip tone="type" label={project.project_type} />
+                )}
+                <span className="muted project-detail-time">
+                  created {formatRelative(project.created_at)}
+                </span>
+              </div>
+
+              {project.raw_requirement && (
+                <details className="project-detail-requirement" open>
+                  <summary className="muted">Raw requirement</summary>
+                  <p>{project.raw_requirement}</p>
+                </details>
+              )}
+            </>
+          )}
+        </header>
+
+        {error && (
+          <div className="project-detail-error">
+            <strong>Something went wrong.</strong> {error}
+          </div>
+        )}
+
+        <section className="project-detail-generate" aria-label="Generate a document">
+          <SectionLabel numeral="I" label="Generate" />
+          <div className="generate-row">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => generate('proposal')}
+              disabled={busyType !== null}
+            >
+              {busyType === 'proposal'
+                ? 'Generating…'
+                : hasProposal
+                  ? `Regenerate Non-Technical Proposal · v${proposalCount}`
+                  : 'Generate Non-Technical Proposal'}
+            </button>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => generate('tech_scope')}
+              disabled={busyType !== null}
+            >
+              {busyType === 'tech_scope'
+                ? 'Generating…'
+                : hasTechScope
+                  ? `Regenerate Technical Proposal · v${techScopeCount}`
+                  : 'Generate Technical Proposal'}
+            </button>
+          </div>
+          <p className="muted generate-hint">
+            Same intake, two proposal variants — one for a non-technical
+            client, one for a technical client.{' '}
+            {project.audience === 'non_tecnico'
+              ? 'This project is set to a non-technical client — the non-technical proposal is the natural pick.'
+              : 'This project is set to a technical client — the technical proposal is the natural pick.'}
+          </p>
         </section>
-      )}
+
+        <section className="project-detail-documents" aria-label="Generated documents">
+          <SectionLabel numeral="II" label="Documents" meta={sectionMeta} />
+          <VersionHistory
+            documents={project.documents}
+            selectedId={selectedId}
+            justCreatedId={justCreatedId}
+            onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
+          />
+        </section>
+
+        {selectedDoc && (
+          <section className="project-detail-viewer" aria-label="Document viewer">
+            <Suspense
+              fallback={
+                <p className="muted project-detail-viewer-loading">
+                  Loading viewer…
+                </p>
+              }
+            >
+              <DocumentViewer
+                doc={selectedDoc}
+                project={project}
+                regenerating={busyType === selectedDoc.doc_type}
+                onRegenerate={(dt) => generate(dt)}
+                onUpdateContent={(md) => handleUpdateDocumentContent(selectedDoc.id, md)}
+                onDelete={handleDeleteDocument(selectedDoc.id)}
+                onClose={() => setSelectedId(null)}
+              />
+            </Suspense>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
