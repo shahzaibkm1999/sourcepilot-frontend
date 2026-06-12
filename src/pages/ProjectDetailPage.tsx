@@ -8,8 +8,9 @@ import StatusChip from '../components/ui/StatusChip';
 import SectionLabel from '../components/ui/SectionLabel';
 import ProjectForm, { ProjectFormValues } from '../components/project/ProjectForm';
 import VersionHistory from '../components/document/VersionHistory';
-// Lazy-load the viewer: it pulls in jspdf + html2canvas (~230 KB
-// gzipped) which we don't need to ship on the projects list.
+// Lazy-load the viewer: it pulls in pdfmake (~1 MB / 360 KB
+// gzipped) via the ↓ PDF export. We don't need to ship it on the
+// projects list — it loads on demand when the viewer is opened.
 const DocumentViewer = lazy(() => import('../components/document/DocumentViewer'));
 import '../styles/project-detail.css';
 import '../styles/reveal.css';

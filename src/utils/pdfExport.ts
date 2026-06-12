@@ -38,7 +38,14 @@ export async function exportStructuredDocAsPdf({
 }: ExportPdfInputs): Promise<void> {
   const { pdfMake } = await getPdfRuntime();
   const def = buildPdfDocDefinition({ markdown, project, doc });
-  pdfMake.createPdf(def).download(`${filename}.pdf`);
+  // pdfmake 0.3.x exposes `download()` as an async method (it awaits
+  // `getBlob()` internally). If the build or the file-save rejects, the
+  // rejection is unhandled unless we await — and an unhandled
+  // rejection is invisible to the caller's try/catch, so the user
+  // would see "nothing happens" with the error only in the console.
+  // Awaiting routes the failure back through `handleExportPdf`'s
+  // try/catch, which surfaces it via `window.alert`.
+  await pdfMake.createPdf(def).download(`${filename}.pdf`);
 }
 
 /**
