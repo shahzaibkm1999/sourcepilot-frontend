@@ -1,7 +1,8 @@
 /* ===========================================
    VersionHistory — grouped, versioned document list.
-   The whole row is a button now, with a "View →"
-   call-to-action on the right that animates on hover.
+   Premium version list: clean two-column rows, a
+   small version badge, a hover state that reveals
+   the "open →" CTA, a current-state gold accent.
    =========================================== */
 
 .version-history {
@@ -21,7 +22,8 @@
     align-items: baseline;
     justify-content: space-between;
     gap: var(--space-3);
-    padding-bottom: var(--space-2);
+    padding: var(--space-3) 0 var(--space-2);
+    border-bottom: 1px solid var(--color-rule);
 }
 
 .version-history-group-label {
@@ -30,15 +32,17 @@
     font-weight: 500;
     font-style: italic;
     color: var(--color-ink);
-    letter-spacing: -0.005em;
+    letter-spacing: -0.008em;
 }
 
 .version-history-group-count {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-ink-subtle);
     flex-shrink: 0;
+    font-weight: 500;
 }
 
 .version-history-list {
@@ -52,39 +56,41 @@
 
 .version-history-item {
     border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-border);
     border-radius: var(--radius-md);
-    background: var(--color-surface);
+    background: var(--color-paper);
     overflow: hidden;
     transition:
         border-color var(--duration-base) var(--ease-out),
         background-color var(--duration-base) var(--ease-out),
-        box-shadow var(--duration-base) var(--ease-out);
+        box-shadow var(--duration-base) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out);
 }
 
 .version-history-item:hover {
-    border-color: var(--color-border-strong);
-    background: var(--color-surface-tint);
+    border-color: var(--color-ink);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-xs);
+    transform: translateY(-1px);
 }
 
 .version-history-item--active {
-    border-left-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent-soft) 18%, var(--color-surface));
+    border-color: var(--color-ink);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-sm);
 }
 
 .version-history-item--just-created {
-    /* Subtle accent border for a few seconds after generation. */
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 25%, transparent);
     animation: version-just-created 1.6s ease-out 1;
 }
 
 @keyframes version-just-created {
     0% {
-        box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 25%, transparent);
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-gold) 30%, transparent);
     }
     100% {
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 25%, transparent);
     }
 }
 
@@ -94,7 +100,7 @@
     justify-content: space-between;
     gap: var(--space-4);
     width: 100%;
-    padding: var(--space-3) var(--space-5);
+    padding: var(--space-4) var(--space-5);
     background: transparent;
     border: 0;
     text-align: left;
@@ -108,40 +114,73 @@
 
 .version-history-item-main {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: var(--space-4);
     min-width: 0;
     flex: 1;
 }
 
+.version-history-item-version {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 32px;
+    padding: 0 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    letter-spacing: 0.04em;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-tint);
+    flex-shrink: 0;
+}
+
+.version-history-item--active .version-history-item-version {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border-color: var(--color-ink);
+}
+
 .version-history-item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.version-history-item-meta-row {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     flex-wrap: wrap;
 }
 
-.version-history-item-version {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--color-ink);
-    letter-spacing: 0.01em;
-}
-
 .version-history-item-current-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-family: var(--font-mono);
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    font-weight: 500;
-    padding: 2px 7px;
+    font-weight: 600;
+    padding: 2px 8px;
     border-radius: 999px;
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background: var(--color-gold-soft);
+    color: var(--color-gold);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
     line-height: 1.3;
+}
+
+.version-history-item-current-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-gold);
 }
 
 .version-history-item-status-badge {
@@ -152,22 +191,22 @@
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    font-weight: 500;
-    padding: 2px 7px;
+    font-weight: 600;
+    padding: 2px 8px;
     border-radius: 999px;
     line-height: 1.3;
 }
 
 .version-history-item-status-badge--pending {
-    background: var(--color-paper);
+    background: var(--color-surface-tint);
     color: var(--color-ink-muted);
     border: 1px solid var(--color-border);
 }
 
 .version-history-item-status-badge--failed {
-    background: color-mix(in srgb, var(--color-error, #b3261e) 12%, transparent);
-    color: var(--color-error, #b3261e);
-    border: 1px solid color-mix(in srgb, var(--color-error, #b3261e) 35%, transparent);
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
 }
 
 .version-history-item-spinner {
@@ -175,7 +214,7 @@
     width: 8px;
     height: 8px;
     border: 1.5px solid var(--color-border);
-    border-top-color: var(--color-ink-muted);
+    border-top-color: var(--color-ink);
     border-radius: 50%;
     animation: version-history-spin 0.7s linear infinite;
 }
@@ -187,6 +226,7 @@
 .version-history-item-sep {
     font-size: 0.78rem;
     user-select: none;
+    display: none; /* compact row */
 }
 
 .version-history-item-time {
@@ -194,6 +234,7 @@
     font-size: 0.72rem;
     text-transform: lowercase;
     letter-spacing: 0.04em;
+    color: var(--color-ink-subtle);
 }
 
 .version-history-item-cta {

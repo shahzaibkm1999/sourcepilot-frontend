@@ -1,23 +1,21 @@
 /* ===========================================
-   DocumentViewer — editorial article
-   Mirrors the old .spec-article aesthetic so the
-   rendered documents feel like a printable PDF.
+   DocumentViewer — premium editorial article
+   A4 paper feel: white surface, editorial margins,
+   subtle layered drop shadow. The on-screen reading
+   experience is a smaller twin of the printed page.
    =========================================== */
 
 .document-article {
-    /* A4 paper feel: cream surface, editorial margins, subtle drop
-       shadow. The width approximates A4 (210mm) with the same
-       inside margins the PDF uses (64pt) so the on-screen reading
-       experience is visually a smaller twin of the printed page. */
     background: var(--color-paper);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-9) var(--space-10);
     box-shadow: var(--shadow-lg);
-    max-width: 820px;
+    max-width: var(--max-width-article);
     margin: 0 auto;
     position: relative;
-    /* Faint paper grain */
+    /* Faint paper grain — gives the surface a real "page" feel
+       without making it look textured. */
     background-image:
         radial-gradient(
             circle at 20% 20%,
@@ -82,7 +80,7 @@
     margin-left: auto;
 }
 
-/* ---- Markdown body — editorial typography (reused from .spec-body) ---- */
+/* ---- Markdown body — editorial typography ---- */
 .document-article-body {
     font-family: var(--font-display);
     font-size: 16.5px;
@@ -96,7 +94,7 @@
 .document-article-body h4 {
     font-family: var(--font-display);
     color: var(--color-ink);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     margin-top: var(--space-8);
     margin-bottom: var(--space-4);
     line-height: 1.2;
@@ -123,9 +121,10 @@
     position: absolute;
     left: -1.4em;
     top: var(--space-6);
-    color: var(--color-accent);
-    opacity: 0.45;
+    color: var(--color-gold);
+    opacity: 0.85;
     font-style: italic;
+    font-weight: 500;
 }
 
 .document-article-body h3 {
@@ -149,10 +148,7 @@
     hyphens: auto;
 }
 
-/* Drop cap on the first paragraph of a generated article. The first
-   <p> after the first <h1>/<h2> is a "lead" paragraph; this gives the
-   viewer the magazine-article feel that pairs with the editorial body
-   typography. */
+/* Drop cap on the first paragraph of a generated article. */
 .document-article-body > p:first-of-type {
     font-size: 1.075em;
     line-height: 1.7;
@@ -182,15 +178,14 @@
 }
 
 .document-article-body li::marker {
-    color: var(--color-accent);
-    opacity: 0.7;
+    color: var(--color-gold);
 }
 
 .document-article-body code {
     font-family: var(--font-mono);
     font-size: 0.88em;
     padding: 2px 6px;
-    background: var(--color-paper);
+    background: var(--color-surface-tint);
     border: 1px solid var(--color-border);
     border-radius: 3px;
     color: var(--color-ink);
@@ -208,7 +203,7 @@
 
 .document-article-body hr {
     border: none;
-    border-top: 1px dashed var(--color-border-strong);
+    border-top: 1px solid var(--color-border-strong);
     margin: var(--space-8) auto;
     width: 30%;
 }
@@ -257,9 +252,9 @@
 
 /* ---- Footer (new) ----
    The footer holds the meta + the action bar (Copy / Download /
-   Export PDF / Edit / Delete / Regenerate / Close). It sits at
-   the END of the article now (was previously at the top), which
-   is the more natural reading flow for a real document. */
+   Export PDF / Edit / Delete / Regenerate / Close). It sits at the
+   END of the article now (was previously at the top), which is the
+   more natural reading flow for a real document. */
 .document-article-footer {
     margin-top: var(--space-9);
     padding-top: var(--space-5);

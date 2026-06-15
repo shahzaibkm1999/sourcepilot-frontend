@@ -29,19 +29,22 @@ export default function TableOfContents({ markdown }: TableOfContentsProps) {
 
   return (
     <section className="toc" aria-label="Table of contents">
-      <div className="toc-label">§ Contents</div>
+      <div className="toc-label">Contents</div>
       <ol className="toc-list">
-        {doc.chapters.map((chapter) => (
-          <li
-            key={`${chapter.number}-${chapter.title}`}
-            className="toc-item"
-          >
-            <span className="toc-numeral">{doc.numerals[chapter.number - 1]}</span>
-            <span className="toc-text">{chapter.title}</span>
-            <span className="toc-leader" aria-hidden="true" />
-            <span className="toc-number">p. {chapter.number}</span>
-          </li>
-        ))}
+        {doc.chapters.map((chapter) => {
+          const kicker = String(chapter.number).padStart(2, '0');
+          return (
+            <li
+              key={`${chapter.number}-${chapter.title}`}
+              className="toc-item"
+            >
+              <span className="toc-numeral">{kicker}</span>
+              <span className="toc-text">{chapter.title}</span>
+              <span className="toc-leader" aria-hidden="true" />
+              <span className="toc-number">p. {chapter.number}</span>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );

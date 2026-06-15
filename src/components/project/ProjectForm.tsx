@@ -67,7 +67,7 @@ export default function ProjectForm({
     <form className="project-form" onSubmit={handleSubmit}>
       <div className="project-form-grid">
         <label className="project-field project-field-wide">
-          <span className="project-label">Project Name</span>
+          <span className="project-label project-label-required">Project Name</span>
           <input
             className="project-input"
             type="text"
@@ -91,7 +91,7 @@ export default function ProjectForm({
         </label>
 
         <fieldset className="project-field project-field-audience">
-          <legend className="project-label">Audience</legend>
+          <legend className="project-label project-label-required">Audience</legend>
           <div className="audience-radios">
             <label className="audience-radio">
               <input
@@ -142,7 +142,7 @@ export default function ProjectForm({
       </div>
 
       <label className="project-field">
-        <span className="project-label">Raw Requirement</span>
+        <span className="project-label project-label-required">Raw Requirement</span>
         <textarea
           className="project-textarea"
           value={requirement}
@@ -152,7 +152,7 @@ export default function ProjectForm({
           required
           minLength={10}
         />
-        <span className="project-hint muted">
+        <span className="project-hint">
           {trimmedReq.length < 10
             ? `At least 10 characters required (${trimmedReq.length}/10)`
             : `${trimmedReq.length} characters`}
@@ -160,21 +160,24 @@ export default function ProjectForm({
       </label>
 
       <div className="project-form-actions">
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={onCancel}
-          disabled={submitting}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="primary-button"
-          disabled={!canSubmit}
-        >
-          {submitting ? 'Saving…' : submitLabel}
-        </button>
+        <span className="create-project-step">Step 1 of 1</span>
+        <div className="project-form-actions-right">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={!canSubmit}
+          >
+            {submitting ? 'Saving…' : submitLabel}
+          </button>
+        </div>
       </div>
     </form>
   );

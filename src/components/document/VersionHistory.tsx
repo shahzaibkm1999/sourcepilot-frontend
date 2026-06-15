@@ -81,37 +81,38 @@ export default function VersionHistory({
                       aria-pressed={isSelected}
                     >
                       <div className="version-history-item-main">
+                        <span className="version-history-item-version">
+                          v{version}
+                        </span>
                         <div className="version-history-item-meta">
-                          <span className="version-history-item-version">
-                            v{version}
-                          </span>
-                          {isCurrent && (
-                            <span className="version-history-item-current-badge">
-                              current
-                            </span>
-                          )}
-                          {doc.status === 'pending' && (
-                            <span className="version-history-item-status-badge version-history-item-status-badge--pending">
-                              <span className="version-history-item-spinner" aria-hidden="true" />
-                              generating…
-                            </span>
-                          )}
-                          {doc.status === 'failed' && (
-                            <span className="version-history-item-status-badge version-history-item-status-badge--failed">
-                              failed
-                            </span>
-                          )}
-                          <span className="version-history-item-sep muted">·</span>
-                          <time
-                            className="version-history-item-time muted"
-                            dateTime={doc.created_at}
-                          >
-                            {doc.status === 'pending'
-                              ? `queued ${formatRelative(doc.created_at)}`
-                              : doc.status === 'failed'
-                                ? `failed ${formatRelative(doc.created_at)}`
-                                : `generated ${formatRelative(doc.created_at)}`}
-                          </time>
+                          <div className="version-history-item-meta-row">
+                            {isCurrent && (
+                              <span className="version-history-item-current-badge">
+                                current
+                              </span>
+                            )}
+                            {doc.status === 'pending' && (
+                              <span className="version-history-item-status-badge version-history-item-status-badge--pending">
+                                <span className="version-history-item-spinner" aria-hidden="true" />
+                                generating…
+                              </span>
+                            )}
+                            {doc.status === 'failed' && (
+                              <span className="version-history-item-status-badge version-history-item-status-badge--failed">
+                                failed
+                              </span>
+                            )}
+                            <time
+                              className="version-history-item-time"
+                              dateTime={doc.created_at}
+                            >
+                              {doc.status === 'pending'
+                                ? `queued ${formatRelative(doc.created_at)}`
+                                : doc.status === 'failed'
+                                  ? `failed ${formatRelative(doc.created_at)}`
+                                  : formatRelative(doc.created_at)}
+                            </time>
+                          </div>
                         </div>
                       </div>
                       <span className="version-history-item-cta" aria-hidden="true">

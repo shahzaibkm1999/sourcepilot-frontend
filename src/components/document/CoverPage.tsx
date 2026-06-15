@@ -1,6 +1,7 @@
 import { Project, ProjectDocument } from '../../types';
 import { docTypeLabel } from '../../utils/audience';
 import { formatRelative } from '../../utils/date';
+import { BrandMark } from '../ui/BrandMark';
 import '../../styles/cover-page.css';
 
 interface CoverPageProps {
@@ -11,14 +12,16 @@ interface CoverPageProps {
 /**
  * CoverPage
  * ---------
- * The first "page" of a generated proposal document. Editorial in
- * tone (large italic serif title, mono eyebrow, accent rule),
- * distinct from the body so the document has a clear front-matter.
+ * The first "page" of a generated proposal document. The visual
+ * treatment is the closest thing in the app to a corporate consulting
+ * cover — large balanced title, kicker line, a quiet meta block, a
+ * single hairline accent. It deliberately says "premium proposal",
+ * not "blog post".
  *
- * Renders as the first child of `.document-article`. The cover
- * page lives INSIDE the article so the PDF export snapshots it
- * together with the body — clients get a proper cover page on the
- * exported PDF.
+ * Renders as the first child of `.document-article`. The cover page
+ * lives INSIDE the article so the PDF export snapshots it together
+ * with the body — clients get a proper cover page on the exported
+ * PDF.
  */
 export default function CoverPage({ project, doc }: CoverPageProps) {
   const generatedDate = new Date(doc.created_at);
@@ -30,7 +33,12 @@ export default function CoverPage({ project, doc }: CoverPageProps) {
 
   return (
     <section className="cover-page" aria-label="Cover page">
-      <div className="cover-page-eyebrow">SourcePilot · {docTypeLabel(doc.doc_type)}</div>
+      <div className="cover-page-eyebrow-row">
+        <BrandMark size="small" />
+        <span className="cover-page-eyebrow-doc">
+          {docTypeLabel(doc.doc_type)}
+        </span>
+      </div>
 
       <h2 className="cover-page-title">{project.name}</h2>
 
@@ -55,7 +63,7 @@ export default function CoverPage({ project, doc }: CoverPageProps) {
           <dd>{project.audience === 'tecnico' ? 'Technical' : 'Non-technical'}</dd>
         </div>
         <div className="cover-page-meta-row">
-          <dt>Version</dt>
+          <dt>Issued</dt>
           <dd>
             <time dateTime={doc.created_at}>
               {dateLong} · {formatRelative(doc.created_at)}

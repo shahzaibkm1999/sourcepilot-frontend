@@ -83,7 +83,7 @@ declare module 'pdfmake/interfaces' {
   }
 
   export interface ColumnContent {
-    columns: Array<{ width?: number | string; text?: string | Content[]; stack?: Content[]; margin?: [number, number, number, number] | number; alignment?: Alignment; style?: string; canvas?: CanvasLine[] }>;
+    columns: Array<{ width?: number | string; text?: string | Content[]; stack?: Content[]; table?: TableContent['table']; margin?: [number, number, number, number] | number; alignment?: Alignment; style?: string; canvas?: CanvasElement[] }>;
     columnGap?: number;
     margin?: [number, number, number, number] | number;
     style?: string;
@@ -100,8 +100,22 @@ declare module 'pdfmake/interfaces' {
     dash?: { length: number; space: number };
   }
 
+  export interface CanvasRect {
+    type: 'rect';
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    color?: string;
+    lineColor?: string;
+    fillColor?: string;
+    lineWidth?: number;
+  }
+
+  export type CanvasElement = CanvasLine | CanvasRect;
+
   export interface CanvasContent {
-    canvas: CanvasLine[];
+    canvas: CanvasElement[];
     margin?: [number, number, number, number] | number;
   }
 
@@ -121,20 +135,20 @@ declare module 'pdfmake/interfaces' {
       body: Array<Array<{ text?: string | Content[]; style?: string; fillColor?: string; border?: [boolean, boolean, boolean, boolean]; stack?: Content[]; margin?: [number, number, number, number] | number; alignment?: Alignment }>>;
     };
     layout?: {
-      hLineWidth?: (() => number) | number;
-      vLineWidth?: (() => number) | number;
-      hLineColor?: (() => string) | string;
-      vLineColor?: (() => string) | string;
-      hPaddingBefore?: number;
-      hPaddingAfter?: number;
-      vPaddingBefore?: number;
-      vPaddingAfter?: number;
+      hLineWidth?: ((i: number, node: unknown) => number) | (() => number) | number;
+      vLineWidth?: ((i: number, node: unknown) => number) | (() => number) | number;
+      hLineColor?: ((i: number, node: unknown) => string) | (() => string) | string;
+      vLineColor?: ((i: number, node: unknown) => string) | (() => string) | string;
+      hPaddingBefore?: ((i: number, node: unknown) => number) | (() => number) | number;
+      hPaddingAfter?: ((i: number, node: unknown) => number) | (() => number) | number;
+      vPaddingBefore?: ((i: number, node: unknown) => number) | (() => number) | number;
+      vPaddingAfter?: ((i: number, node: unknown) => number) | (() => number) | number;
       // pdfmake/pdfkit also support per-cell function-form paddings.
       // We use these for the table layout.
-      paddingTop?: (() => number) | number;
-      paddingBottom?: (() => number) | number;
-      paddingLeft?: (() => number) | number;
-      paddingRight?: (() => number) | number;
+      paddingTop?: ((i: number, node: unknown) => number) | (() => number) | number;
+      paddingBottom?: ((i: number, node: unknown) => number) | (() => number) | number;
+      paddingLeft?: ((i: number, node: unknown) => number) | (() => number) | number;
+      paddingRight?: ((i: number, node: unknown) => number) | (() => number) | number;
     };
     margin?: [number, number, number, number] | number;
   }

@@ -1,10 +1,8 @@
 /* ===========================================
    StructuredBody — chapter / block layout.
-   Replaces the bare <h1>/<h2>/<p> stream with
-   numbered chapters, drop caps, callouts, and
-   editorial list markers. This is what makes
-   the on-screen viewer feel like a finished
-   proposal document, not a markdown readme.
+   The visual treatment that makes the on-screen
+   article feel like a finished proposal document
+   rather than a markdown readme.
    =========================================== */
 
 .structured-body {
@@ -14,8 +12,6 @@
 }
 
 .structured-body > .chapter:first-of-type {
-    /* The first chapter opens with a clean top edge — no extra
-       spacing pushing it away from the TOC above. */
     margin-top: 0;
 }
 
@@ -47,41 +43,59 @@
 }
 
 .chapter-numeral {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-style: italic;
-    color: var(--color-accent);
-    letter-spacing: 0;
-    text-transform: none;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-gold) 6%, var(--color-paper));
 }
 
 .chapter-number {
     font-weight: 500;
+    color: var(--color-ink-subtle);
 }
 
 .chapter-title {
     font-family: var(--font-display);
-    font-size: 30px;
+    font-size: 34px;
     font-weight: 500;
     font-style: italic;
-    letter-spacing: -0.018em;
-    line-height: 1.15;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
     color: var(--color-ink);
     margin: 0;
     text-wrap: balance;
+    max-width: 24ch;
 }
 
 .chapter-rule {
-    width: 48px;
+    width: 100%;
+    height: 1px;
+    background: var(--color-ink);
+    margin-top: var(--space-2);
+    position: relative;
+}
+
+.chapter-rule::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -0.5px;
+    width: 12px;
     height: 2px;
-    background: var(--color-accent);
-    margin-top: var(--space-1);
+    background: var(--color-gold);
 }
 
 .chapter-body {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    max-width: 68ch;
 }
 
 /* ---- Paragraphs ---- */
@@ -102,10 +116,10 @@
 
 .chapter-paragraph--lead::first-letter {
     font-family: var(--font-display);
-    font-size: 3.4em;
-    line-height: 0.9;
+    font-size: 3.6em;
+    line-height: 0.88;
     float: left;
-    margin: 0.05em 0.12em 0 0;
+    margin: 0.05em 0.14em 0 0;
     color: var(--color-accent);
     font-weight: 500;
     font-style: italic;
@@ -115,7 +129,7 @@
     font-family: var(--font-mono);
     font-size: 0.88em;
     padding: 2px 6px;
-    background: var(--color-paper);
+    background: var(--color-surface-tint);
     border: 1px solid var(--color-border);
     border-radius: 3px;
     color: var(--color-ink);
@@ -149,7 +163,7 @@
 }
 
 .chapter-list--unordered li::marker {
-    color: var(--color-accent);
+    color: var(--color-gold);
     font-size: 0.9em;
 }
 
@@ -164,20 +178,24 @@
     font-family: var(--font-mono);
     font-size: 0.88em;
     padding: 2px 6px;
-    background: var(--color-paper);
+    background: var(--color-surface-tint);
     border: 1px solid var(--color-border);
     border-radius: 3px;
     color: var(--color-ink);
 }
 
-/* ---- Callout (blockquote) ---- */
+/* ---- Callout (blockquote) ----
+   A premium consulting-deck style callout: a tinted surface with
+   a thin gold left rule, italic serif body, and a tiny serif
+   quote-mark. The tint is calm enough to read as a callout, not
+   an alert. */
 .chapter-callout {
     display: flex;
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
-    background: var(--color-paper);
-    border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-accent);
+    background: var(--color-gold-soft);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 20%, transparent);
+    border-left: 3px solid var(--color-gold);
     border-radius: var(--radius-md);
     font-family: var(--font-display);
     font-size: 1.05em;
@@ -192,8 +210,8 @@
     font-family: var(--font-display);
     font-size: 2.2em;
     line-height: 0.8;
-    color: var(--color-accent);
-    opacity: 0.4;
+    color: var(--color-gold);
+    opacity: 0.7;
     flex-shrink: 0;
     margin-top: 0.1em;
 }
@@ -210,13 +228,14 @@
 /* ---- Subheadings ---- */
 .chapter-h3 {
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 600;
     font-style: italic;
     color: var(--color-ink);
-    letter-spacing: -0.012em;
-    margin: var(--space-3) 0 0;
+    letter-spacing: -0.015em;
+    margin: var(--space-4) 0 0;
     line-height: 1.3;
+    max-width: 24ch;
 }
 
 .chapter-h4 {
@@ -229,14 +248,18 @@
     margin: var(--space-3) 0 0;
 }
 
-/* ---- Tables ---- */
+/* ---- Tables ----
+   The premium consulting-deck table: hairline horizontal rules
+   only, paper-tinted header band, mono small-caps header text,
+   a quiet left accent on the first column. Body cells share the
+   display serif so the table sits in the same type world as
+   paragraphs. */
 .chapter-table-wrap {
-    /* Wrap the table in a horizontally-scrolling container so wide
-       tables (e.g. 4-column risk matrices) don't blow out the
-       article width on narrow screens. */
     width: 100%;
     overflow-x: auto;
-    margin: var(--space-2) 0 var(--space-4);
+    margin: var(--space-3) 0 var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 }
 
 .chapter-table {
@@ -246,9 +269,7 @@
     font-size: 14.5px;
     line-height: 1.55;
     color: var(--color-ink);
-    background: transparent;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--color-paper);
 }
 
 .chapter-table thead th {
@@ -259,14 +280,14 @@
     font-weight: 600;
     color: var(--color-ink-muted);
     text-align: left;
-    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-ink);
     vertical-align: bottom;
-    background: transparent;
+    background: var(--color-surface-tint);
 }
 
 .chapter-table tbody td {
-    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-rule);
     vertical-align: top;
 }
@@ -275,12 +296,16 @@
     border-bottom: none;
 }
 
+.chapter-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--color-gold-soft) 30%, var(--color-paper));
+}
+
 .chapter-table th code,
 .chapter-table td code {
     font-family: var(--font-mono);
     font-size: 0.88em;
     padding: 1px 5px;
-    background: var(--color-paper);
+    background: var(--color-surface-tint);
     border: 1px solid var(--color-border);
     border-radius: 3px;
     color: var(--color-ink);
@@ -298,11 +323,9 @@
     color: var(--color-ink);
 }
 
-/* On the narrowest screens, shrink the table type slightly so a
-   3-column table still fits. */
 @media (max-width: 900px) {
     .chapter-title {
-        font-size: 24px;
+        font-size: 26px;
     }
     .chapter-callout {
         padding: var(--space-4) var(--space-5);

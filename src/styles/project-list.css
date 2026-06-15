@@ -22,20 +22,33 @@
 }
 
 .project-list-internal-title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     color: var(--color-ink-muted);
     font-weight: 500;
 }
 
+.project-list-internal-title::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--color-gold);
+    display: inline-block;
+}
+
 .project-list-internal-count {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
     color: var(--color-ink-subtle);
-    margin-top: 2px;
-    letter-spacing: 0.04em;
+    margin-top: var(--space-1);
+    font-weight: 500;
 }
 
 .project-list-status {
@@ -58,7 +71,7 @@
 
 .project-list-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-5);
 }
 
@@ -81,8 +94,9 @@
 
 .project-list-loadmore-count {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
     color: var(--color-ink-subtle);
+    font-weight: 500;
 }

@@ -392,29 +392,65 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
               }}
             />
           ) : (
-            <>
-              <h1 className="project-detail-title">{project.name}</h1>
-              {project.client_name && (
-                <div className="project-detail-client muted">for {project.client_name}</div>
-              )}
-
-              <div className="project-detail-chips">
-                <StatusChip tone="audience" label={audienceLabel(project.audience)} />
-                {project.project_type && (
-                  <StatusChip tone="type" label={project.project_type} />
+            <div className="project-detail-header-inner">
+              <div>
+                <h1 className="project-detail-title">{project.name}</h1>
+                {project.client_name && (
+                  <div className="project-detail-client">
+                    Prepared for <strong>{project.client_name}</strong>
+                  </div>
                 )}
-                <span className="muted project-detail-time">
-                  created {formatRelative(project.created_at)}
-                </span>
+
+                <div className="project-detail-chips">
+                  <StatusChip tone="audience" label={audienceLabel(project.audience)} />
+                  {project.project_type && (
+                    <StatusChip tone="type" label={project.project_type} />
+                  )}
+                </div>
+
+                {project.raw_requirement && (
+                  <details className="project-detail-requirement" open>
+                    <summary>Raw requirement</summary>
+                    <p>{project.raw_requirement}</p>
+                  </details>
+                )}
               </div>
 
-              {project.raw_requirement && (
-                <details className="project-detail-requirement" open>
-                  <summary className="muted">Raw requirement</summary>
-                  <p>{project.raw_requirement}</p>
-                </details>
-              )}
-            </>
+              <aside className="project-detail-meta-card" aria-label="Project metadata">
+                <div className="project-detail-meta-card-header">
+                  <span>Project record</span>
+                </div>
+                <dl className="project-detail-meta-card-body">
+                  <div className="project-detail-meta-card-row">
+                    <dt>Created</dt>
+                    <dd>{formatRelative(project.created_at)}</dd>
+                  </div>
+                  <div className="project-detail-meta-card-row">
+                    <dt>Audience</dt>
+                    <dd>{audienceLabel(project.audience)}</dd>
+                  </div>
+                  {project.project_type && (
+                    <div className="project-detail-meta-card-row">
+                      <dt>Type</dt>
+                      <dd>{project.project_type}</dd>
+                    </div>
+                  )}
+                  {project.client_name && (
+                    <div className="project-detail-meta-card-row">
+                      <dt>Client</dt>
+                      <dd>{project.client_name}</dd>
+                    </div>
+                  )}
+                  <div className="project-detail-meta-card-row">
+                    <dt>Documents</dt>
+                    <dd>
+                      {project.documents.length} version
+                      {project.documents.length === 1 ? '' : 's'}
+                    </dd>
+                  </div>
+                </dl>
+              </aside>
+            </div>
           )}
         </header>
 
@@ -425,34 +461,70 @@ export default function ProjectDetailPage({ projectId, onBack }: ProjectDetailPa
         )}
 
         <section className="project-detail-generate" aria-label="Generate a document">
-          <SectionLabel numeral="I" label="Generate" />
+          <SectionLabel numeral="I" label="Generate" meta="two variants" />
           <div className="generate-row">
             <button
               type="button"
-              className="primary-button"
+              className="generate-option"
               onClick={() => generate('proposal')}
               disabled={busyType !== null}
             >
-              {busyType === 'proposal'
-                ? 'Generating…'
-                : hasProposal
-                  ? `Regenerate Non-Technical Proposal · v${proposalCount}`
-                  : 'Generate Non-Technical Proposal'}
+              <span className="generate-option-eyebrow">
+                {busyType === 'proposal' ? 'Generating' : 'Non-technical'}
+              </span>
+              <span className="generate-option-title">
+                {hasProposal
+                  ? `Regenerate proposal · v${proposalCount}`
+                  : 'Generate client proposal'}
+              </span>
+              <span className="generate-option-description">
+                Airtable-style overview, scope, timeline, pricing, and the
+                access we need from the client. Written for a non-technical
+                reader.
+              </span>
+              <span className="generate-option-cta">
+                <span>
+                  {busyType === 'proposal'
+                    ? 'Working…'
+                    : hasProposal
+                      ? 'Create a new version'
+                      : 'Generate document'}
+                </span>
+                <span className="generate-option-cta-arrow" aria-hidden="true">→</span>
+              </span>
             </button>
+
             <button
               type="button"
-              className="primary-button"
+              className="generate-option"
               onClick={() => generate('tech_scope')}
               disabled={busyType !== null}
             >
-              {busyType === 'tech_scope'
-                ? 'Generating…'
-                : hasTechScope
-                  ? `Regenerate Technical Proposal · v${techScopeCount}`
-                  : 'Generate Technical Proposal'}
+              <span className="generate-option-eyebrow">
+                {busyType === 'tech_scope' ? 'Generating' : 'Technical'}
+              </span>
+              <span className="generate-option-title">
+                {hasTechScope
+                  ? `Regenerate technical scope · v${techScopeCount}`
+                  : 'Generate technical scope'}
+              </span>
+              <span className="generate-option-description">
+                Orbit-style architecture, stack, NFRs, risks, and next
+                steps. Written for a technical reviewer.
+              </span>
+              <span className="generate-option-cta">
+                <span>
+                  {busyType === 'tech_scope'
+                    ? 'Working…'
+                    : hasTechScope
+                      ? 'Create a new version'
+                      : 'Generate document'}
+                </span>
+                <span className="generate-option-cta-arrow" aria-hidden="true">→</span>
+              </span>
             </button>
           </div>
-          <p className="muted generate-hint">
+          <p className="generate-hint">
             Same intake, two proposal variants — one for a non-technical
             client, one for a technical client.{' '}
             {project.audience === 'non_tecnico'

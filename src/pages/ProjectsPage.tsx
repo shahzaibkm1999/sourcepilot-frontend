@@ -10,9 +10,10 @@ interface ProjectsPageProps {
 /**
  * ProjectsPage
  * ------------
- * The SourcePilot home page. Editorial PageHeader up top, then
- * the project list. The list itself, the empty state, the
- * loading state, and the error state all live in `ProjectList`.
+ * The SourcePilot home page. Editorial PageHeader up top with
+ * a primary action on the right, then the project list. The
+ * list itself, the empty state, the loading state, and the
+ * error state all live in `ProjectList`.
  *
  * The whole page mounts with a single staggered fade-up — one
  * well-orchestrated moment is more interesting than scattered
@@ -28,6 +29,15 @@ export default function ProjectsPage({
         eyebrow="SourcePilot"
         title="AI Proposal Generator"
         subtitle="One intake. Two audience-specific outputs. Turn a raw client requirement into a non-technical proposal or a formal technical scope in a single click."
+        actions={
+          <button
+            type="button"
+            className="primary-button"
+            onClick={onNewProject}
+          >
+            <span aria-hidden="true">+</span> New Project
+          </button>
+        }
       />
 
       <section className="projects-page-section">

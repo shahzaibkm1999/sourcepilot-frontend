@@ -1,17 +1,18 @@
 /* ===========================================
    ProjectCard — SourcePilot dashboard tile.
-   Editorial / blueprint aesthetic.
+   Premium corporate tile: hairline border, gold
+   corner mark, a deliberate "open →" CTA.
    =========================================== */
 
 .project-card {
     display: flex;
     flex-direction: column;
     text-align: left;
-    padding: var(--space-6) var(--space-6) var(--space-5);
-    background-color: var(--color-surface);
+    padding: var(--space-5) var(--space-6) var(--space-5);
+    background-color: var(--color-paper);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
     cursor: pointer;
     position: relative;
     transition:
@@ -21,21 +22,22 @@
         background-color var(--duration-base) var(--ease-out);
     font-family: inherit;
     color: inherit;
-    min-height: 180px;
+    min-height: 200px;
     overflow: hidden;
 }
 
 .project-card::before {
+    /* Gold top-left corner accent — the subtle brand mark that
+       premium tile systems use to mark "interactive surface". */
     content: "";
     position: absolute;
-    left: 0;
     top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--color-accent);
+    left: 0;
+    width: 32px;
+    height: 1px;
+    background-color: var(--color-gold);
     opacity: 0;
-    transform: scaleY(0.6);
-    transform-origin: center;
+    transform: translateX(-8px);
     transition:
         opacity var(--duration-base) var(--ease-out),
         transform var(--duration-base) var(--ease-out);
@@ -48,7 +50,7 @@
     top: var(--space-4);
     right: var(--space-5);
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--color-accent);
     opacity: 0;
     transform: translateX(-4px);
@@ -58,16 +60,16 @@
 }
 
 .project-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-md);
-    border-color: var(--color-border-strong);
-    background-color: var(--color-surface);
+    border-color: var(--color-ink);
+    background-color: var(--color-paper);
 }
 
 .project-card:hover::before,
 .project-card:focus-visible::before {
     opacity: 1;
-    transform: scaleY(1);
+    transform: translateX(0);
 }
 
 .project-card:hover::after,
@@ -87,17 +89,17 @@
     align-items: flex-start;
     gap: var(--space-3);
     margin-bottom: var(--space-3);
-    /* Reserve room for the ::after indicator on the right. */
     padding-right: var(--space-7);
 }
 
 .project-card-name {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 500;
+    font-style: italic;
     color: var(--color-ink);
-    line-height: 1.25;
-    letter-spacing: -0.005em;
+    line-height: 1.22;
+    letter-spacing: -0.012em;
     word-break: break-word;
     text-wrap: balance;
 }
@@ -110,7 +112,7 @@
     flex-shrink: 0;
     padding-top: 4px;
     letter-spacing: 0.04em;
-    text-transform: lowercase;
+    text-transform: uppercase;
 }
 
 .project-card-client {
@@ -143,54 +145,55 @@
     gap: var(--space-2);
     margin-top: auto;
     padding-top: var(--space-4);
-    border-top: 1px dashed var(--color-rule);
+    border-top: 1px solid var(--color-rule);
 }
 
 /* ---- Chip primitive + tones ---- */
 .chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px var(--space-2);
+    gap: 5px;
+    padding: 3px 9px;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--color-ink-muted);
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
-    background-color: var(--color-surface-tint);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background-color: var(--color-paper);
     line-height: 1.4;
+    font-weight: 500;
     transition: background-color var(--duration-base) var(--ease-out),
                 border-color var(--duration-base) var(--ease-out);
 }
 
 .chip-type,
 .chip-audience {
-    border-color: color-mix(in srgb, var(--color-accent) 28%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
     color: var(--color-accent);
-    background-color: color-mix(in srgb, var(--color-accent-soft) 35%, transparent);
+    background-color: color-mix(in srgb, var(--color-accent-soft) 50%, var(--color-paper));
 }
 
 .chip-doc {
     border-color: var(--color-border-strong);
     color: var(--color-ink);
-    background-color: var(--color-surface);
+    background-color: var(--color-paper);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 500;
+    letter-spacing: 0.12em;
+    font-weight: 600;
 }
 
 .chip-stage {
     border-color: var(--color-border-strong);
     color: var(--color-ink);
-    background-color: var(--color-surface);
+    background-color: var(--color-paper);
 }
 
 .chip-stage-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: var(--color-accent);
+    background-color: var(--color-gold);
     flex-shrink: 0;
 }

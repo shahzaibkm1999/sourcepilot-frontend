@@ -60,7 +60,6 @@ export default function StructuredBody({ markdown }: StructuredBodyProps) {
 }
 
 function ChapterHeader({
-  numeral,
   number,
   title,
 }: {
@@ -68,11 +67,16 @@ function ChapterHeader({
   number: number;
   title: string;
 }) {
+  // Two-digit arabic kicker (01, 02, 03, …) — feels more like a
+  // modern consulting deck and matches the body section labels used
+  // on the rest of the app. The roman numeral is preserved in the
+  // aria-label for AT users.
+  const kicker = String(number).padStart(2, '0');
   return (
     <header className="chapter-header">
       <div className="chapter-header-meta">
-        <span className="chapter-numeral">§ {numeral}</span>
-        <span className="chapter-number">Chapter {String(number).padStart(2, '0')}</span>
+        <span className="chapter-numeral">{kicker}</span>
+        <span className="chapter-number">Chapter {kicker} of the proposal</span>
       </div>
       <h2 className="chapter-title">{title}</h2>
       <div className="chapter-rule" aria-hidden="true" />

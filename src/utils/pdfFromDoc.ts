@@ -10,19 +10,23 @@
  * That means chapter numbers, numerals, and the block order are
  * always in sync between the two surfaces.
  *
- * Visual choices:
- *   - A4 page, generous editorial margins.
- *   - Spectral for display + chapter titles + drop caps.
+ * Visual choices — "premium corporate editorial":
+ *   - A4 page, generous editorial margins (A4 print convention).
+ *   - Spectral for display + chapter titles + drop caps + quotes.
  *   - IBM Plex Sans for body, IBM Plex Mono for eyebrows / meta.
+ *   - Navy primary, warm gold secondary, paper white surface.
  *   - Drop cap on the first paragraph of each chapter is implemented
  *     as a two-column layout (pdfmake has no `::first-letter` support).
- *   - Callouts use a light-tinted background + a left accent rule.
- *   - Cover page is a single column with eyebrow / title / rule / meta.
- *   - TOC is a single column with dotted leaders (rendered as the
- *     TOC text on the left, the page reference on the right, with a
- *     horizontal line of dots between them).
+ *   - Callouts use a gold-tinted background + a left gold rule.
+ *   - Cover page: large italic title, kicker meta block, gold
+ *     corner accent on the rule.
+ *   - TOC: a hairline rule above and below, dotted leaders, small
+ *     mono "01" kickers per row.
+ *   - Chapter headers: small "01" pill in gold + italic title.
  *   - Footer on every page: project name on the left, "Page N of M"
- *     on the right, separated by a thin rule.
+ *     on the right, separated by a hairline rule.
+ *   - Sign-off: heavy black rule + gold corner accent + tight meta
+ *     grid.
  */
 import type { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 import type { Project, ProjectDocument } from '../types';
@@ -33,14 +37,16 @@ import { docTypeLabel } from './audience';
 // --- Palette. Mirrors the CSS custom properties in styles/index.css
 //     so the PDF reads as the same brand as the on-screen viewer.
 const COLOR = {
-  ink: '#1c1917',
-  inkMuted: '#57534e',
-  inkSubtle: '#8a8478',
-  accent: '#1e3a8a',
-  accentSoft: '#dbe5ff',
-  paper: '#fbf7ed',
-  border: '#dcd3bc',
-  rule: '#e9dfc6',
+  ink: '#0c111c',
+  inkMuted: '#4a5266',
+  inkSubtle: '#8b8f9a',
+  accent: '#0b2545',
+  accentSoft: '#e6ecf5',
+  gold: '#a07836',
+  goldSoft: '#f5eddc',
+  paper: '#ffffff',
+  border: '#e4e2da',
+  rule: '#ece9e0',
 } as const;
 
 const FONT = {
@@ -107,7 +113,7 @@ export function buildPdfDocDefinition({
     defaultStyle: {
       font: FONT.body,
       fontSize: 10.5,
-      lineHeight: 1.45,
+      lineHeight: 1.5,
       color: COLOR.ink,
     },
     styles: pdfStyles(),
@@ -127,47 +133,67 @@ function pdfStyles() {
     // --- Cover page ---
     eyebrow: {
       font: FONT.mono,
-      fontSize: 8,
+      fontSize: 8.5,
       characterSpacing: 0.6,
+      color: COLOR.inkSubtle,
+    },
+    coverBrand: {
+      font: FONT.display,
+      fontSize: 11,
+      italics: false,
+      bold: true,
+      color: COLOR.ink,
+    },
+    coverDocPill: {
+      font: FONT.mono,
+      fontSize: 8,
+      characterSpacing: 0.5,
       color: COLOR.inkSubtle,
     },
     coverTitle: {
       font: FONT.display,
-      fontSize: 36,
+      fontSize: 42,
       italics: true,
       color: COLOR.ink,
-      lineHeight: 1.08,
+      lineHeight: 1.02,
     },
     coverClientLabel: {
       font: FONT.mono,
       fontSize: 8.5,
-      characterSpacing: 0.4,
+      characterSpacing: 0.5,
       color: COLOR.inkSubtle,
     },
     coverClientName: {
       font: FONT.display,
-      fontSize: 14,
+      fontSize: 15,
       italics: true,
       color: COLOR.inkMuted,
     },
     metaLabel: {
       font: FONT.mono,
       fontSize: 8,
-      characterSpacing: 0.4,
+      characterSpacing: 0.5,
       color: COLOR.inkSubtle,
     },
     metaValue: {
       font: FONT.body,
-      fontSize: 10.5,
+      fontSize: 10,
       color: COLOR.ink,
+      bold: false,
     },
 
     // --- Table of contents ---
+    tocLabel: {
+      font: FONT.mono,
+      fontSize: 9,
+      characterSpacing: 0.6,
+      color: COLOR.inkMuted,
+    },
     tocNumeral: {
-      font: FONT.display,
-      fontSize: 11,
-      italics: true,
-      color: COLOR.accent,
+      font: FONT.mono,
+      fontSize: 8,
+      bold: true,
+      color: COLOR.gold,
     },
     tocText: {
       font: FONT.display,
@@ -182,53 +208,53 @@ function pdfStyles() {
     },
 
     // --- Chapter header ---
-    chapterNumeral: {
-      font: FONT.display,
-      fontSize: 18,
-      italics: true,
-      color: COLOR.accent,
-      lineHeight: 1.0,
+    chapterKicker: {
+      font: FONT.mono,
+      fontSize: 8,
+      bold: true,
+      characterSpacing: 0.6,
+      color: COLOR.gold,
     },
     chapterNumber: {
       font: FONT.mono,
       fontSize: 7.5,
       characterSpacing: 0.5,
       color: COLOR.inkSubtle,
-      margin: [0, 4, 0, 0],
     },
     chapterTitle: {
       font: FONT.display,
-      fontSize: 22,
+      fontSize: 24,
       italics: true,
       color: COLOR.ink,
-      lineHeight: 1.12,
+      lineHeight: 1.1,
     },
 
     // --- Body ---
     body: {
       font: FONT.body,
       fontSize: 10.5,
-      lineHeight: 1.55,
+      lineHeight: 1.6,
       color: COLOR.ink,
     },
     leadBody: {
       font: FONT.body,
       fontSize: 11,
-      lineHeight: 1.55,
+      lineHeight: 1.6,
       color: COLOR.ink,
     },
     dropCap: {
       font: FONT.display,
-      fontSize: 48,
+      fontSize: 56,
       italics: true,
       bold: true,
       color: COLOR.accent,
-      lineHeight: 0.9,
+      lineHeight: 0.88,
     },
     h3: {
       font: FONT.display,
       fontSize: 14,
       italics: true,
+      bold: true,
       color: COLOR.ink,
     },
     h4: {
@@ -241,7 +267,7 @@ function pdfStyles() {
     listItem: {
       font: FONT.body,
       fontSize: 10.5,
-      lineHeight: 1.5,
+      lineHeight: 1.55,
       color: COLOR.ink,
     },
     tableHeader: {
@@ -250,6 +276,10 @@ function pdfStyles() {
       bold: true,
       characterSpacing: 0.5,
       color: COLOR.inkMuted,
+      fillColor: COLOR.paper,
+    },
+    tableHeaderFill: {
+      fillColor: '#f6f5f1',
     },
     tableCell: {
       font: FONT.body,
@@ -259,17 +289,17 @@ function pdfStyles() {
     },
     calloutMark: {
       font: FONT.display,
-      fontSize: 26,
+      fontSize: 28,
       italics: true,
-      color: COLOR.accent,
+      color: COLOR.gold,
       lineHeight: 0.7,
-      margin: [0, -6, 0, 0],
+      margin: [0, -8, 0, 0],
     },
     calloutBody: {
       font: FONT.display,
       fontSize: 11.5,
       italics: true,
-      lineHeight: 1.5,
+      lineHeight: 1.55,
       color: COLOR.ink,
     },
     strong: {
@@ -287,7 +317,7 @@ function pdfStyles() {
     // --- Sign-off / footer ---
     signOffHeadline: {
       font: FONT.display,
-      fontSize: 18,
+      fontSize: 22,
       italics: true,
       color: COLOR.ink,
     },
@@ -301,7 +331,7 @@ function pdfStyles() {
     footerText: {
       font: FONT.mono,
       fontSize: 7.5,
-      characterSpacing: 0.4,
+      characterSpacing: 0.5,
       color: COLOR.inkSubtle,
     },
   };
@@ -310,6 +340,14 @@ function pdfStyles() {
 // ============================================================
 // Section builders
 // ============================================================
+
+/**
+ * Two-digit arabic kicker (01, 02, 03, …). Kept as a small helper
+ * because both the on-screen viewer and the PDF use it.
+ */
+function kicker(n: number): string {
+  return String(n).padStart(2, '0');
+}
 
 function coverPageContent({
   project,
@@ -331,44 +369,75 @@ function coverPageContent({
 
   return [
     // Vertical breathing room above the eyebrow so the cover page has
-    // an intentional top margin (pdfmake adds a small leading margin
-    // automatically; we add ~140pt to push the title down).
-    { text: '', margin: [0, 140, 0, 0] },
+    // an intentional top margin.
+    { text: '', margin: [0, 120, 0, 0] },
 
+    // Brand row — small SourcePilot wordmark on the left, doc type
+    // pill on the right. Two-column layout to mirror the on-screen
+    // cover.
     {
-      text: `SourcePilot · ${docTypeLabel(doc.doc_type).toUpperCase()}`,
-      style: 'eyebrow',
+      columns: [
+        {
+          width: '*',
+          stack: [
+            {
+              text: [
+                { text: '◎ ', style: 'coverBrand', color: COLOR.gold },
+                { text: 'SourcePilot', style: 'coverBrand' },
+              ] as unknown as string,
+            },
+          ],
+        },
+        {
+          width: 'auto',
+          stack: [
+            {
+              text: docTypeLabel(doc.doc_type).toUpperCase(),
+              style: 'coverDocPill',
+            },
+          ],
+          alignment: 'right',
+        },
+      ],
+      columnGap: 8,
     },
 
     // Project title — display serif, italic, large.
     {
       text: title,
       style: 'coverTitle',
-      margin: [0, 18, 0, 0],
+      margin: [0, 64, 0, 0],
     },
 
     // Optional client name, treated as a subtitle.
     project.client_name
       ? {
           text: [
-            { text: 'Prepared for ', style: 'coverClientLabel' },
+            { text: 'Prepared for  ', style: 'coverClientLabel' },
             { text: project.client_name, style: 'coverClientName' },
           ],
-          margin: [0, 14, 0, 0],
+          margin: [0, 16, 0, 0],
         }
       : { text: '', margin: [0, 0, 0, 0] },
 
-    // Accent rule
+    // Accent rule: black + small gold corner accent.
     {
       canvas: [
         {
-          type: 'line',
-          x1: 0,
-          y1: 0,
-          x2: 120,
-          y2: 0,
-          lineWidth: 1.5,
-          lineColor: COLOR.accent,
+          type: 'rect',
+          x: 0,
+          y: 0,
+          w: 64,
+          h: 2,
+          color: COLOR.ink,
+        },
+        {
+          type: 'rect',
+          x: 64,
+          y: 0,
+          w: 16,
+          h: 2,
+          color: COLOR.gold,
         },
       ],
       margin: [0, 36, 0, 0],
@@ -393,7 +462,7 @@ function coverPageContent({
             { text: audienceLabel, style: 'metaValue' },
           ],
           [
-            { text: 'Version', style: 'metaLabel' },
+            { text: 'Issued', style: 'metaLabel' },
             { text: dateLong, style: 'metaValue' },
           ],
         ],
@@ -414,25 +483,52 @@ function tocContent({ structured }: { structured: StructuredDoc }): Content[] {
   if (structured.chapters.length === 0) return [];
 
   return [
-    { text: '§ Contents', style: 'eyebrow', margin: [0, 0, 0, 18] },
+    { text: 'Contents', style: 'tocLabel', margin: [0, 0, 0, 18] },
 
-    ...structured.chapters.flatMap((chapter, idx) => {
-      const numeral = structured.numerals[idx];
+    ...structured.chapters.flatMap((chapter) => {
       const row: Content = {
-        margin: [0, 0, 0, 6],
+        margin: [0, 0, 0, 8],
         columns: [
           {
-            width: 28,
-            text: numeral,
-            style: 'tocNumeral',
+            width: 32,
+            // Arabic kicker pill (01, 02, …) — mirrors the
+            // on-screen chapter header pill.
+            stack: [
+              {
+                table: {
+                  widths: [32],
+                  body: [
+                    [
+                      {
+                        text: kicker(chapter.number),
+                        style: 'tocNumeral',
+                        alignment: 'center',
+                        margin: [0, 2, 0, 2],
+                      },
+                    ],
+                  ],
+                },
+                layout: {
+                  hLineColor: () => '#d6c594',
+                  vLineColor: () => '#d6c594',
+                  hLineWidth: () => 0.5,
+                  vLineWidth: () => 0.5,
+                  hPaddingBefore: () => 0,
+                  hPaddingAfter: () => 0,
+                  vPaddingBefore: () => 0,
+                  vPaddingAfter: () => 0,
+                },
+              },
+            ],
           },
           {
             width: '*',
             text: chapter.title,
             style: 'tocText',
+            margin: [0, 4, 0, 0],
           },
           {
-            width: 40,
+            width: 48,
             text: '',
             // Dotted leaders: a canvas of small dots stretched to fill.
             canvas: [
@@ -440,7 +536,7 @@ function tocContent({ structured }: { structured: StructuredDoc }): Content[] {
                 type: 'line',
                 x1: 0,
                 y1: 6,
-                x2: 40,
+                x2: 48,
                 y2: 6,
                 lineWidth: 0.5,
                 lineColor: COLOR.rule,
@@ -449,13 +545,14 @@ function tocContent({ structured }: { structured: StructuredDoc }): Content[] {
             ],
           },
           {
-            width: 24,
+            width: 28,
             text: `p. ${chapter.number}`,
             style: 'tocPage',
             alignment: 'right',
+            margin: [0, 4, 0, 0],
           },
         ],
-        columnGap: 8,
+        columnGap: 10,
       };
       return [row];
     }),
@@ -470,14 +567,12 @@ function chaptersContent({ structured }: { structured: StructuredDoc }): Content
 
 function chapterContent({
   chapter,
-  structured,
   isFirst,
 }: {
   chapter: StructuredDoc['chapters'][number];
   structured: StructuredDoc;
   isFirst: boolean;
 }): Content[] {
-  const numeral = structured.numerals[chapter.number - 1];
   const firstParagraphIdx = chapter.blocks.findIndex(
     (b) => b.kind === 'paragraph',
   );
@@ -485,21 +580,40 @@ function chapterContent({
   return [
     // Spacing above the chapter (less for the very first chapter on
     // the page, more for subsequent ones).
-    { text: '', margin: [0, isFirst ? 0 : 32, 0, 0] },
+    { text: '', margin: [0, isFirst ? 0 : 36, 0, 0] },
 
-    // Chapter header: numeral + chapter number, then title, then rule.
+    // Chapter header: kicker pill on the left, italic title on the
+    // right. The kicker is a bordered cell so it reads as a small
+    // "badge" even in print.
     {
       columns: [
         {
-          width: 60,
+          width: 36,
           stack: [
             {
-              text: `§ ${numeral}`,
-              style: 'chapterNumeral',
-            },
-            {
-              text: `Chapter ${String(chapter.number).padStart(2, '0')}`,
-              style: 'chapterNumber',
+              table: {
+                widths: [36],
+                body: [
+                  [
+                    {
+                      text: kicker(chapter.number),
+                      style: 'chapterKicker',
+                      alignment: 'center',
+                      margin: [0, 4, 0, 4],
+                    },
+                  ],
+                ],
+              },
+              layout: {
+                hLineColor: () => '#d6c594',
+                vLineColor: () => '#d6c594',
+                hLineWidth: () => 0.5,
+                vLineWidth: () => 0.5,
+                hPaddingBefore: () => 0,
+                hPaddingAfter: () => 0,
+                vPaddingBefore: () => 0,
+                vPaddingAfter: () => 0,
+              },
             },
           ],
         },
@@ -507,13 +621,14 @@ function chapterContent({
           width: '*',
           text: chapter.title,
           style: 'chapterTitle',
-          margin: [0, 4, 0, 0],
+          margin: [0, 2, 0, 0],
         },
       ],
-      columnGap: 16,
+      columnGap: 14,
     },
 
-    // Accent rule under the chapter header.
+    // Accent rule under the chapter header — black with a small
+    // gold corner accent on the right.
     {
       canvas: [
         {
@@ -522,11 +637,19 @@ function chapterContent({
           y1: 0,
           x2: 467,
           y2: 0,
-          lineWidth: 0.75,
-          lineColor: COLOR.accent,
+          lineWidth: 1,
+          lineColor: COLOR.ink,
+        },
+        {
+          type: 'rect',
+          x: 455,
+          y: -1,
+          w: 12,
+          h: 3,
+          color: COLOR.gold,
         },
       ],
-      margin: [0, 8, 0, 0],
+      margin: [0, 10, 0, 0],
     },
 
     // Body blocks
@@ -577,7 +700,7 @@ function blockToContent(block: DocBlock, opts: { isLeadParagraph: boolean }): Co
         {
           text: asPdfText(renderInlineText(block.text)),
           style: block.level === 3 ? 'h3' : 'h4',
-          margin: [0, 14, 0, 6],
+          margin: [0, 16, 0, 6],
         },
       ];
     case 'table':
@@ -588,11 +711,10 @@ function blockToContent(block: DocBlock, opts: { isLeadParagraph: boolean }): Co
 /**
  * Render a markdown table as a pdfmake `table` content node.
  *
- * Editorial treatment: hairline borders, paper-tinted header row,
- * bold dark header text, body cells in the same body font as the
- * rest of the document. Column widths are auto-distributed by
- * pdfmake. Per-column alignment from the markdown source (`:---`
- * / `---:` / `:---:` markers) is honoured.
+ * Premium treatment: hairline borders only on outer + header
+ * bottom, a faint paper-tinted header row, mono small-caps header
+ * text, body cells in body serif. Per-column alignment from the
+ * markdown source is honoured.
  */
 function tableBlock(block: Extract<DocBlock, { kind: 'table' }>): Content {
   const align = block.align;
@@ -603,6 +725,7 @@ function tableBlock(block: Extract<DocBlock, { kind: 'table' }>): Content {
     text: asPdfText(renderInlineText(cell)),
     style: 'tableHeader',
     alignment: cellAlign(ci),
+    fillColor: '#f6f5f1',
   }));
 
   const bodyRows = block.rows.map((row) =>
@@ -622,10 +745,10 @@ function tableBlock(block: Extract<DocBlock, { kind: 'table' }>): Content {
     layout: {
       hLineWidth: () => 0.5,
       vLineWidth: () => 0,
-      hLineColor: () => '#a8602a',
+      hLineColor: () => '#d8d4c4',
       paddingTop: () => 6,
       paddingBottom: () => 6,
-      paddingLeft: () => 0,
+      paddingLeft: () => 8,
       paddingRight: () => 8,
     },
     margin: [0, 4, 0, 14],
@@ -643,7 +766,7 @@ function dropCapParagraph(inline: RenderedInline): Content {
   return {
     columns: [
       {
-        width: 56,
+        width: 60,
         margin: [0, 6, 0, 0],
         text: dropCap,
         style: 'dropCap',
@@ -660,21 +783,21 @@ function dropCapParagraph(inline: RenderedInline): Content {
 }
 
 function calloutBlock(text: string): Content {
-  // A 2-column table: thin accent column for the left rule, the
+  // A 2-column table: thin gold column for the left rule, the
   // pull-quote text in the wide right column. The right cell has a
-  // light tint to read as a "callout" without a heavy border.
+  // gold tint to read as a "callout" without a heavy border.
   return {
     table: {
       widths: [3, '*'],
       body: [
         [
-          { text: '', fillColor: COLOR.accent, border: [false, false, false, false] },
+          { text: '', fillColor: COLOR.gold, border: [false, false, false, false] },
           {
             stack: [
               { text: '“', style: 'calloutMark' },
               { text: asPdfText(renderInlineText(text)), style: 'calloutBody' },
             ],
-            fillColor: COLOR.accentSoft,
+            fillColor: COLOR.goldSoft,
             margin: [12, 8, 12, 10],
           },
         ],
@@ -694,7 +817,8 @@ function calloutBlock(text: string): Content {
 
 function footerContent({ project }: { project: Project }): (currentPage: number, pageCount: number) => Content {
   // Three columns: project name on the left, spacer, page number on
-  // the right. The thin top rule is drawn by the canvas cell.
+  // the right. The thin top rule is drawn by the canvas cell, with
+  // a small gold corner accent.
   return (currentPage, pageCount) => ({
     margin: [PAGE.marginLeft, 24, PAGE.marginRight, 0],
     stack: [
@@ -708,6 +832,14 @@ function footerContent({ project }: { project: Project }): (currentPage: number,
             y2: 0,
             lineWidth: 0.5,
             lineColor: COLOR.rule,
+          },
+          {
+            type: 'rect',
+            x: PAGE.width - PAGE.marginLeft - PAGE.marginRight - 12,
+            y: -1,
+            w: 12,
+            h: 2,
+            color: COLOR.gold,
           },
         ],
       },
@@ -745,13 +877,30 @@ function signOffContent({
     day: 'numeric',
   });
   return [
-    { text: '', margin: [0, 48, 0, 0] },
+    { text: '', margin: [0, 56, 0, 0] },
+    // Heavy black rule + gold corner accent at top of sign-off
     {
       canvas: [
-        { type: 'line', x1: 0, y1: 0, x2: 467, y2: 0, lineWidth: 0.5, lineColor: COLOR.rule },
+        {
+          type: 'line',
+          x1: 0,
+          y1: 0,
+          x2: 467,
+          y2: 0,
+          lineWidth: 2,
+          lineColor: COLOR.ink,
+        },
+        {
+          type: 'rect',
+          x: 443,
+          y: -1,
+          w: 24,
+          h: 6,
+          color: COLOR.gold,
+        },
       ],
     },
-    { text: 'Ready to proceed?', style: 'signOffHeadline', margin: [0, 18, 0, 6] },
+    { text: 'Ready to proceed?', style: 'signOffHeadline', margin: [0, 20, 0, 6] },
     {
       text: `This ${docTypeLabel(doc.doc_type).toLowerCase()} is ready for review. Reply with any questions, requested changes, or a confirmation to begin.`,
       style: 'signOffBody',
@@ -783,7 +932,7 @@ function signOffContent({
         hLineWidth: () => 0,
         vLineWidth: () => 0,
         hPaddingBefore: 0,
-        hPaddingAfter: 6,
+        hPaddingAfter: 8,
         vPaddingBefore: 0,
         vPaddingAfter: 0,
       },
@@ -897,23 +1046,31 @@ function extractDropCap(inline: RenderedInline): { dropCap: string; rest: Render
       rest: [remaining, ...tail],
     };
   }
-  // First span is styled; preserve its style on the remainder.
+  // First span is styled — keep its style on the remainder.
   if (first.text.length === 0) {
     return extractDropCap(tail);
   }
   const cap = first.text.charAt(0).toUpperCase();
-  const remaining = first.text.slice(1);
+  const remainingText = first.text.slice(1);
+  if (!remainingText) {
+    return { dropCap: cap, rest: tail };
+  }
+  const restHead: InlineContent = { text: remainingText, ...(first.style ? { style: first.style } : {}) };
   return {
     dropCap: cap,
-    rest: [{ text: remaining, style: first.style }, ...tail],
+    rest: [restHead, ...tail],
   };
 }
 
-function stripH1(md: string): string | null {
-  const m = /^#\s+(.+?)\s*$/m.exec(md);
-  return m ? m[1] : null;
-}
+// ============================================================
+// Small helpers
+// ============================================================
 
 function pageBreak(): Content {
   return { text: '', pageBreak: 'after' };
+}
+
+function stripH1(markdown: string): string | null {
+  const m = /^#\s+(.+?)\s*$/m.exec(markdown);
+  return m ? m[1].trim() : null;
 }
