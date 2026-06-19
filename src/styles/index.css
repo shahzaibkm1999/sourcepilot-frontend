@@ -1,6 +1,15 @@
 /* ===========================================
    Design tokens + base typography
-   Aesthetic: editorial / blueprint
+   Aesthetic: premium corporate editorial
+
+   Core ideas:
+   - crisp white surfaces with hairline dividers
+   - serif display (Spectral) for titles, sans (IBM Plex Sans) for body
+   - mono (IBM Plex Mono) for labels, codes, timestamps
+   - navy primary accent + warm gold secondary (subtle, never gaudy)
+   - architectural dot grid background (very faint)
+   - strong typographic hierarchy, generous whitespace
+   - numbered section "kickers" (01 / 02 / 03) in display italic
    =========================================== */
 
 :root {
@@ -9,30 +18,36 @@
   --font-body: 'IBM Plex Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Cascadia Code', 'Menlo', monospace;
 
-  /* Color - warm paper + ink */
-  --color-bg: #f5efe1;            /* warm off-white, paper */
-  --color-paper: #fbf7ed;        /* slightly lighter surface */
+  /* Color - crisp white + ink + warm gold */
+  --color-bg: #fafaf8;            /* off-white page surface */
+  --color-paper: #ffffff;         /* primary card / sheet */
+  --color-paper-soft: #f6f5f1;    /* secondary sheet / sunken */
   --color-surface: #ffffff;
-  --color-surface-tint: #faf6ed;
-  --color-border: #dcd3bc;        /* warm beige */
-  --color-border-strong: #b9ad8d;
-  --color-rule: #e9dfc6;          /* faint horizontal rules */
+  --color-surface-tint: #f6f5f1;
+  --color-surface-deep: #efede5;
+  --color-border: #e4e2da;        /* hairline */
+  --color-border-strong: #c8c4b6;
+  --color-rule: #ece9e0;          /* faint dividers */
 
-  --color-ink: #1c1917;           /* warm near-black */
-  --color-ink-muted: #57534e;
-  --color-ink-subtle: #8a8478;
+  --color-ink: #0c111c;           /* near-black with cool cast */
+  --color-ink-muted: #4a5266;
+  --color-ink-subtle: #8b8f9a;
 
-  /* Accent - deep ink blue */
-  --color-accent: #1e3a8a;
-  --color-accent-hover: #1e40af;
-  --color-accent-soft: #dbe5ff;
+  /* Primary accent - deep navy (Microsoft / Amazon / Google proposal feel) */
+  --color-accent: #0b2545;
+  --color-accent-hover: #133b6f;
+  --color-accent-soft: #e6ecf5;
   --color-accent-ink: #ffffff;
 
+  /* Secondary accent - warm gold (used sparingly, like McKinsey accent rules) */
+  --color-gold: #a07836;
+  --color-gold-soft: #f5eddc;
+
   /* Semantic */
-  --color-danger: #991b1b;
-  --color-danger-soft: #fef2f2;
-  --color-success: #166534;
-  --color-warn: #92400e;
+  --color-danger: #8a1f1f;
+  --color-danger-soft: #f7e9e7;
+  --color-success: #1f5b3a;
+  --color-warn: #8a5a1f;
 
   /* Spacing - generous editorial scale */
   --space-1: 4px;
@@ -45,16 +60,35 @@
   --space-8: 40px;
   --space-9: 56px;
   --space-10: 72px;
+  --space-11: 96px;
+  --space-12: 128px;
 
   /* Radii - subtle, editorial */
+  --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
+  --radius-xl: 14px;
 
-  /* Shadows - subtle, paper-on-paper */
-  --shadow-sm: 0 1px 0 rgba(28, 25, 23, 0.05);
-  --shadow-md: 0 2px 8px rgba(28, 25, 23, 0.06), 0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-lg: 0 12px 32px rgba(28, 25, 23, 0.08), 0 2px 6px rgba(28, 25, 23, 0.04);
+  /* Shadows - layered, paper-on-paper */
+  --shadow-xs: 0 1px 2px rgba(12, 17, 28, 0.04);
+  --shadow-sm: 0 1px 2px rgba(12, 17, 28, 0.04), 0 1px 1px rgba(12, 17, 28, 0.02);
+  --shadow-md: 0 2px 6px rgba(12, 17, 28, 0.05), 0 1px 2px rgba(12, 17, 28, 0.03);
+  --shadow-lg: 0 16px 36px rgba(12, 17, 28, 0.08), 0 2px 6px rgba(12, 17, 28, 0.04);
+  --shadow-xl: 0 24px 60px rgba(12, 17, 28, 0.10), 0 4px 12px rgba(12, 17, 28, 0.05);
+
+  /* Motion - snappy but not jarring */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
+  --duration-slower: 600ms;
+
+  /* Layout */
+  --max-width: 920px;
+  --max-width-wide: 1180px;
+  --max-width-article: 820px;
 }
 
 *,
@@ -68,7 +102,11 @@ body,
 #root {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -77,69 +115,300 @@ body {
   line-height: 1.6;
   color: var(--color-ink);
   background-color: var(--color-bg);
-  /* Faint horizontal rules every 32px - architectural drafting paper feel */
+  /* Architectural dot grid — the kind of background you see in
+     McKinsey / BCG decks and modern editorial sites. Very faint,
+     fixed to the viewport, never competes with the content. */
   background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 31px,
-      var(--color-rule) 31px,
-      var(--color-rule) 32px
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-ink) 6%, transparent) 1px,
+      transparent 0
     );
+  background-size: 28px 28px;
   background-attachment: fixed;
+  background-position: 0 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "kern", "liga";
 }
 
 h1, h2, h3, h4, h5 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  line-height: 1.18;
+  line-height: 1.14;
   color: var(--color-ink);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
 p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 button {
   font-family: inherit;
   cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
   transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    border-color 180ms ease,
-    transform 120ms ease,
-    box-shadow 180ms ease;
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    opacity var(--duration-base) var(--ease-out);
 }
 
 input,
 button,
-textarea {
+textarea,
+select {
   font-family: inherit;
   font-size: inherit;
+}
+
+/* Refined focus state — accessible but on-brand. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 a {
   color: var(--color-accent);
   text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
-  transition: border-color 180ms ease, color 180ms ease;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  transition: border-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out);
 }
 a:hover {
   color: var(--color-accent-hover);
   border-bottom-color: var(--color-accent-hover);
 }
 
+/* Subtle selection styling */
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-ink);
+}
+
 /* Reusable utility classes */
 .muted { color: var(--color-ink-muted); }
 .error-text { color: var(--color-danger); }
 
-/* Subtle selection styling */
-::selection {
-  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---- Brand wordmark ----
+   Used in the running header and cover page. A small SVG mark +
+   "SourcePilot" in a specific weight. The mark is a stylized
+   compass / orbit glyph (the product's namesake).
+   --------------------------------------------------------------- */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--color-ink);
+  font-style: normal;
+}
+
+.brand-mark-glyph {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.brand-mark--small {
+  font-size: 0.92rem;
+  gap: 8px;
+}
+
+.brand-mark--small .brand-mark-glyph {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---- Reusable button primitives (use everywhere) ---- */
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  border: 1px solid var(--color-accent);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  position: relative;
+  box-shadow: var(--shadow-xs);
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.primary-button:disabled {
+  background-color: var(--color-border-strong);
+  border-color: var(--color-border-strong);
+  color: var(--color-ink-subtle);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* "secondary" — same shape as primary but outlined only. For form actions
+   where we want a clear "save" / "cancel" hierarchy without looking like
+   a separate brand. */
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-border-strong);
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: var(--color-paper);
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  transform: translateY(-1px);
+}
+
+.secondary-button:disabled {
+  color: var(--color-ink-subtle);
+  border-color: var(--color-border);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  border: 1px solid transparent;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.ghost-button:hover:not(:disabled) {
+  background-color: var(--color-surface-tint);
+  color: var(--color-ink);
+  border-color: var(--color-border);
+}
+
+.ghost-button:disabled {
+  color: var(--color-ink-subtle);
+  cursor: not-allowed;
+}
+
+.ghost-button.danger {
+  color: var(--color-danger);
+}
+.ghost-button.danger:hover:not(:disabled) {
+  background-color: var(--color-danger-soft);
+  border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+  color: var(--color-danger);
+}
+
+/* ---- Top app bar (sticky brand bar) ----
+   Sits at the top of every page, gives the product a single,
+   consistent surface — like the chrome bar in a M365 / Google
+   Workspace / AWS console product. Brand on the left, contextual
+   metadata on the right.
+   --------------------------------------------------------------- */
+.app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-7);
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  backdrop-filter: saturate(160%) blur(10px);
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-bar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.app-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-subtle);
+  flex-shrink: 0;
+}
+
+.app-bar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+}
+
+@media (max-width: 700px) {
+  .app-bar {
+    padding: var(--space-3) var(--space-5);
+  }
+  .app-bar-divider,
+  .app-bar-right {
+    display: none;
+  }
 }

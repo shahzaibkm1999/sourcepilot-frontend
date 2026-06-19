@@ -1,0 +1,102 @@
+/* ===========================================
+   ProjectList — dashboard list view.
+   PageHeader is the page title; this file owns
+   the in-section header (count + CTA), the grid,
+   and the load-more block.
+   =========================================== */
+
+.project-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.project-list-internal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+}
+
+.project-list-internal-title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-ink-muted);
+    font-weight: 500;
+}
+
+.project-list-internal-title::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--color-gold);
+    display: inline-block;
+}
+
+.project-list-internal-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-ink-subtle);
+    margin-top: var(--space-1);
+    font-weight: 500;
+}
+
+.project-list-status {
+    padding: var(--space-7) 0;
+    text-align: center;
+    font-style: italic;
+    font-family: var(--font-display);
+    color: var(--color-ink-muted);
+}
+
+.project-list-error {
+    padding: var(--space-5);
+    background: var(--color-danger-soft);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+    border-left: 3px solid var(--color-danger);
+    color: var(--color-danger);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+}
+
+.project-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-5);
+}
+
+.project-list-loadmore {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    position: relative;
+}
+
+.project-list-loadmore::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--color-border-strong);
+    margin-bottom: var(--space-3);
+}
+
+.project-list-loadmore-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-ink-subtle);
+    font-weight: 500;
+}

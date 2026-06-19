@@ -1,6 +1,9 @@
 import {
-  GeneratedSpec,
-  SpecificationWithProject,
+  Project,
+  ProjectDocument,
+  ProjectWithDocuments,
+  Audience,
+  DocType,
 } from '../types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -32,41 +35,101 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 // ---- API surface used by the React app ----
+//
+// Post-refactor (Jun 2026), the backend exposes five routes on
+// /api/projects. See backend/src/routes/projectRoutes.ts.
+export const PAGE_SIZE = 20;
+
 export const api = {
-  health(): Promise<{ status: string }> {
-    return request('/health');
+  /**
+   * Paginated list, newest first. Returns the requested page plus
+   * the total row count and a `hasMore` flag. Defaults match the
+   * backend defaults (limit=20, offset=0).
+   */
+  listProjects(
+    opts: { limit?: number; offset?: number } = {},
+  ): Promise<{ projects: Project[]; total: number; hasMore: boolean }> {
+    const params = new URLSearchParams({
+      limit: String(opts.limit ?? PAGE_SIZE),
+      offset: String(opts.offset ?? 0),
+    });
+    return request(`/api/projects?${params.toString()}`);
   },
 
-  listSpecs(): Promise<{ specifications: SpecificationWithProject[] }> {
-    return request('/api/specifications');
+  getProject(id: string): Promise<{ project: ProjectWithDocuments }> {
+    return request(`/api/projects/${encodeURIComponent(id)}`);
   },
 
-  getSpec(id: string): Promise<{ specification: SpecificationWithProject }> {
-    return request(`/api/specifications/${encodeURIComponent(id)}`);
-  },
-
-  getSpecByName(name: string): Promise<{ specification: SpecificationWithProject }> {
-    return request(`/api/specifications/by-name/${encodeURIComponent(name)}`);
-  },
-
-  generateSpec(projectIdea: string): Promise<{
-    generated: GeneratedSpec;
-    specification: SpecificationWithProject;
-  }> {
-    return request('/api/specifications/generate', {
+  createProject(input: {
+    name: string;
+    client_name?: string;
+    audience: Audience;
+    project_type?: string;
+    raw_requirement: string;
+  }): Promise<{ project: Project }> {
+    return request('/api/projects', {
       method: 'POST',
-      body: JSON.stringify({ projectIdea }),
+      body: JSON.stringify(input),
     });
   },
 
-  saveSpec(input: {
-    projectName: string;
-    projectDescription?: string;
-    specificationContent: string;
-  }): Promise<{ project: { id: string; name: string }; specification: { id: string; version: number } }> {
-    return request('/api/specifications/save', {
+  generateDocument(
+    projectId: string,
+    docType: DocType,
+  ): Promise<{ document: ProjectDocument }> {
+    return request(`/api/projects/${encodeURIComponent(projectId)}/documents`, {
       method: 'POST',
-      body: JSON.stringify(input),
+      body: JSON.stringify({ doc_type: docType }),
+    });
+  },
+
+  getDocument(id: string): Promise<{ document: ProjectDocument }> {
+    return request(`/api/projects/documents/${encodeURIComponent(id)}`);
+  },
+
+  /**
+   * Partial update of a project's intake fields. `null` for an
+   * optional field (client_name, project_type) clears it; absent
+   * keys are left untouched. At least one field is required.
+   */
+  updateProject(
+    id: string,
+    partial: {
+      name?: string;
+      client_name?: string | null;
+      audience?: Audience;
+      project_type?: string | null;
+      raw_requirement?: string;
+    },
+  ): Promise<{ project: Project }> {
+    return request(`/api/projects/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(partial),
+    });
+  },
+
+  /** Hard-delete a project. Cascades to all of its documents. */
+  deleteProject(id: string): Promise<void> {
+    return request(`/api/projects/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /** Edit a single document's body. Does not bump `created_at`. */
+  updateDocument(
+    id: string,
+    contentMarkdown: string,
+  ): Promise<{ document: ProjectDocument }> {
+    return request(`/api/projects/documents/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ content_markdown: contentMarkdown }),
+    });
+  },
+
+  /** Hard-delete a single document version. Other versions remain. */
+  deleteDocument(id: string): Promise<void> {
+    return request(`/api/projects/documents/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
     });
   },
 };

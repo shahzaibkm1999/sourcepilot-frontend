@@ -1,0 +1,336 @@
+/* ===========================================
+   StructuredBody — chapter / block layout.
+   The visual treatment that makes the on-screen
+   article feel like a finished proposal document
+   rather than a markdown readme.
+   =========================================== */
+
+.structured-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+}
+
+.structured-body > .chapter:first-of-type {
+    margin-top: 0;
+}
+
+/* ---- Chapter ---- */
+.chapter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    position: relative;
+}
+
+.chapter-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+}
+
+.chapter-header-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-subtle);
+}
+
+.chapter-numeral {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-gold) 6%, var(--color-paper));
+}
+
+.chapter-number {
+    font-weight: 500;
+    color: var(--color-ink-subtle);
+}
+
+.chapter-title {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--color-ink);
+    margin: 0;
+    text-wrap: balance;
+    max-width: 24ch;
+}
+
+.chapter-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--color-ink);
+    margin-top: var(--space-2);
+    position: relative;
+}
+
+.chapter-rule::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -0.5px;
+    width: 12px;
+    height: 2px;
+    background: var(--color-gold);
+}
+
+.chapter-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 68ch;
+}
+
+/* ---- Paragraphs ---- */
+.chapter-paragraph {
+    font-family: var(--font-display);
+    font-size: 16.5px;
+    line-height: 1.75;
+    color: var(--color-ink);
+    margin: 0;
+    text-wrap: pretty;
+    hyphens: auto;
+}
+
+.chapter-paragraph--lead {
+    font-size: 1.075em;
+    line-height: 1.7;
+}
+
+.chapter-paragraph--lead::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.6em;
+    line-height: 0.88;
+    float: left;
+    margin: 0.05em 0.14em 0 0;
+    color: var(--color-accent);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.chapter-paragraph code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+.chapter-paragraph strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.chapter-paragraph em {
+    font-style: italic;
+    color: var(--color-ink);
+}
+
+/* ---- Lists ---- */
+.chapter-list {
+    font-family: var(--font-display);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-ink);
+    padding-left: var(--space-7);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.chapter-list li {
+    padding-left: var(--space-2);
+}
+
+.chapter-list--unordered li::marker {
+    color: var(--color-gold);
+    font-size: 0.9em;
+}
+
+.chapter-list--ordered li::marker {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.chapter-list li code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+/* ---- Callout (blockquote) ----
+   A premium consulting-deck style callout: a tinted surface with
+   a thin gold left rule, italic serif body, and a tiny serif
+   quote-mark. The tint is calm enough to read as a callout, not
+   an alert. */
+.chapter-callout {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    background: var(--color-gold-soft);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 20%, transparent);
+    border-left: 3px solid var(--color-gold);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: var(--color-ink);
+    font-style: italic;
+    position: relative;
+    text-wrap: pretty;
+}
+
+.chapter-callout-mark {
+    font-family: var(--font-display);
+    font-size: 2.2em;
+    line-height: 0.8;
+    color: var(--color-gold);
+    opacity: 0.7;
+    flex-shrink: 0;
+    margin-top: 0.1em;
+}
+
+.chapter-callout-body {
+    flex: 1;
+}
+
+.chapter-callout-body strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+/* ---- Subheadings ---- */
+.chapter-h3 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-ink);
+    letter-spacing: -0.015em;
+    margin: var(--space-4) 0 0;
+    line-height: 1.3;
+    max-width: 24ch;
+}
+
+.chapter-h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-ink-muted);
+    font-weight: 500;
+    margin: var(--space-3) 0 0;
+}
+
+/* ---- Tables ----
+   The premium consulting-deck table: hairline horizontal rules
+   only, paper-tinted header band, mono small-caps header text,
+   a quiet left accent on the first column. Body cells share the
+   display serif so the table sits in the same type world as
+   paragraphs. */
+.chapter-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin: var(--space-3) 0 var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.chapter-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--color-ink);
+    background: var(--color-paper);
+}
+
+.chapter-table thead th {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-ink);
+    vertical-align: bottom;
+    background: var(--color-surface-tint);
+}
+
+.chapter-table tbody td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+    vertical-align: top;
+}
+
+.chapter-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.chapter-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--color-gold-soft) 30%, var(--color-paper));
+}
+
+.chapter-table th code,
+.chapter-table td code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+.chapter-table th strong,
+.chapter-table td strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.chapter-table th em,
+.chapter-table td em {
+    font-style: italic;
+    color: var(--color-ink);
+}
+
+@media (max-width: 900px) {
+    .chapter-title {
+        font-size: 26px;
+    }
+    .chapter-callout {
+        padding: var(--space-4) var(--space-5);
+    }
+    .chapter-table {
+        font-size: 13.5px;
+    }
+}

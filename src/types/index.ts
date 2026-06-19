@@ -1,40 +1,42 @@
 /**
- * Mirrors the backend types in backend/src/types/index.ts.
- * Kept in sync manually - small enough that codegen would be overkill.
+ * Mirrors the backend types in `backend/src/types/index.ts`. Kept in
+ * sync manually — the surface is small enough that codegen would be
+ * overkill.
+ *
+ * Post-refactor (Jun 2026), the product is an AI document generator.
+ * The schema collapsed to two tables: `projects` + `documents`. The
+ * old 8-stage pipeline types are gone.
  */
+
+export type Audience = 'non_tecnico' | 'tecnico';
+export type DocType = 'proposal' | 'tech_scope';
+export type DocumentStatus = 'pending' | 'ready' | 'failed';
 
 export interface Project {
   id: string;
   name: string;
-  description: string | null;
+  client_name: string | null;
+  audience: Audience;
+  project_type: string | null;
+  raw_requirement: string;
   created_at: string;
 }
 
-export interface Specification {
+export interface ProjectDocument {
   id: string;
   project_id: string;
-  content: string;
-  version: number;
+  doc_type: DocType;
+  content_markdown: string;
   created_at: string;
+  /**
+   * Queue state. `pending` = AI call in flight, body is empty.
+   * `ready` = body is final. `failed` = AI call threw, body
+   * contains the error message.
+   */
+  status: DocumentStatus;
 }
 
-export interface SpecificationWithProject extends Specification {
-  project: Pick<Project, 'id' | 'name' | 'description'>;
+/** A project bundled with all its documents (joined on the server). */
+export interface ProjectWithDocuments extends Project {
+  documents: ProjectDocument[];
 }
-
-export interface GeneratedSpec {
-  projectName: string;
-  projectDescription: string;
-  content: string;
-}
-
-/**
- * What the dashboard renders in the right-hand "viewer" pane.
- * Either an unsaved generation or a saved row from the DB.
- */
-export type ViewerContent =
-  | { kind: 'idle' }
-  | { kind: 'loading'; message?: string }
-  | { kind: 'error'; message: string }
-  | { kind: 'generated'; spec: GeneratedSpec }
-  | { kind: 'saved'; spec: SpecificationWithProject };

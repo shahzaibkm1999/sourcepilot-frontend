@@ -1,0 +1,24 @@
+/* ===========================================
+   ProjectsPage — home / dashboard.
+   =========================================== */
+
+.projects-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-page-section {
+    padding: var(--space-7) var(--space-10) var(--space-10);
+    max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+}
+
+@media (max-width: 900px) {
+    .projects-page-section {
+        padding-left: var(--space-6);
+        padding-right: var(--space-6);
+    }
+}

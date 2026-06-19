@@ -1,0 +1,299 @@
+/* ===========================================
+   DocumentViewer — premium editorial article
+   A4 paper feel: white surface, editorial margins,
+   subtle layered drop shadow. The on-screen reading
+   experience is a smaller twin of the printed page.
+   =========================================== */
+
+.document-article {
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-9) var(--space-10);
+    box-shadow: var(--shadow-lg);
+    max-width: var(--max-width-article);
+    margin: 0 auto;
+    position: relative;
+    /* Faint paper grain — gives the surface a real "page" feel
+       without making it look textured. */
+    background-image:
+        radial-gradient(
+            circle at 20% 20%,
+            color-mix(in srgb, var(--color-ink) 1.5%, transparent) 0.5px,
+            transparent 0.5px
+        );
+    background-size: 4px 4px;
+    /* Honor print semantics — the on-screen article is one long
+       scroll, but the page break that the PDF inserts between
+       cover / TOC / first chapter / sign-off should not collapse. */
+    break-inside: avoid;
+}
+
+.document-article-header {
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-7);
+}
+
+.document-article-stamp {
+    display: inline-block;
+    margin-bottom: var(--space-4);
+}
+
+.document-article-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    margin-bottom: var(--space-2);
+    color: var(--color-ink);
+}
+
+.document-article-subtitle {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-4);
+}
+
+.document-article-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-5);
+}
+
+.document-article-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding-top: var(--space-3);
+    margin-top: var(--space-3);
+    border-top: 1px dashed var(--color-rule);
+}
+
+.document-article-actions .primary-button {
+    margin-left: auto;
+}
+
+/* ---- Markdown body — editorial typography ---- */
+.document-article-body {
+    font-family: var(--font-display);
+    font-size: 16.5px;
+    line-height: 1.75;
+    color: var(--color-ink);
+}
+
+.document-article-body h1,
+.document-article-body h2,
+.document-article-body h3,
+.document-article-body h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    letter-spacing: -0.012em;
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+    line-height: 1.2;
+}
+
+.document-article-body h1 {
+    font-size: 30px;
+    font-weight: 500;
+    font-style: italic;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-3);
+}
+
+.document-article-body h2 {
+    font-size: 24px;
+    font-weight: 500;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-6);
+    position: relative;
+}
+
+.document-article-body h2::before {
+    content: '§';
+    position: absolute;
+    left: -1.4em;
+    top: var(--space-6);
+    color: var(--color-gold);
+    opacity: 0.85;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.document-article-body h3 {
+    font-size: 19px;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.document-article-body h4 {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-ink-muted);
+    margin-top: var(--space-6);
+}
+
+.document-article-body p {
+    margin-bottom: var(--space-5);
+    hyphens: auto;
+}
+
+/* Drop cap on the first paragraph of a generated article. */
+.document-article-body > p:first-of-type {
+    font-size: 1.075em;
+    line-height: 1.7;
+    color: var(--color-ink);
+}
+
+.document-article-body > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.6em;
+    line-height: 0.9;
+    float: left;
+    margin: 0.05em 0.12em 0 0;
+    color: var(--color-accent);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.document-article-body ul,
+.document-article-body ol {
+    padding-left: var(--space-7);
+    margin-bottom: var(--space-5);
+}
+
+.document-article-body li {
+    margin-bottom: var(--space-3);
+    padding-left: var(--space-2);
+}
+
+.document-article-body li::marker {
+    color: var(--color-gold);
+}
+
+.document-article-body code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-ink);
+}
+
+.document-article-body strong {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.document-article-body em {
+    font-style: italic;
+    color: var(--color-ink);
+}
+
+.document-article-body hr {
+    border: none;
+    border-top: 1px solid var(--color-border-strong);
+    margin: var(--space-8) auto;
+    width: 30%;
+}
+
+@media (max-width: 900px) {
+    .document-article {
+        padding: var(--space-6) var(--space-5);
+    }
+    .document-article-title {
+        font-size: 24px;
+    }
+    .document-article-body h1 {
+        font-size: 24px;
+    }
+    .document-article-body h2 {
+        font-size: 20px;
+    }
+}
+
+.document-article-pending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-9) var(--space-5);
+    text-align: center;
+    color: var(--color-ink-muted);
+    font-family: var(--font-display);
+    font-style: italic;
+    min-height: 240px;
+}
+
+.document-article-pending-spinner {
+    width: 32px;
+    height: 32px;
+    border: 2.5px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: document-article-pending-spin 0.9s linear infinite;
+}
+
+@keyframes document-article-pending-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---- Footer (new) ----
+   The footer holds the meta + the action bar (Copy / Download /
+   Export PDF / Edit / Delete / Regenerate / Close). It sits at the
+   END of the article now (was previously at the top), which is the
+   more natural reading flow for a real document. */
+.document-article-footer {
+    margin-top: var(--space-9);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.document-article-footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.document-article-footer-meta .muted {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-subtle);
+}
+
+.document-article-footer-meta time {
+    color: var(--color-ink-subtle);
+}
+
+/* The footer reuses the existing .document-article-actions styles
+   for the action bar; the dashed top border still reads as a
+   separator. In the new structure the actions live in the footer
+   instead of the header. */
+.document-article-footer .document-article-actions {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+}
